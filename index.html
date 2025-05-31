@@ -2,272 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title id="title">Sudoku</title>
+  <title>Sudoku</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #fff;
+      background: #fff;
       color: #000;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
       transition: 0.3s;
     }
     body.dark {
       background-color: #121212;
       color: #ffffff;
     }
+    .container {
+      display: flex;
+      gap: 30px;
+    }
+    .game-panel {
+      text-align: center;
+    }
     #sudoku {
       display: grid;
-      grid-template-columns: repeat(9, 40px);
-      grid-template-rows: repeat(9, 40px);
-      margin: 20px auto;
-      justify-content: center;
+      grid-template-columns: repeat(9, 45px);
+      grid-template-rows: repeat(9, 45px);
+      border: 2px solid black;
     }
-    input {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
+    .cell {
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
       text-align: center;
+      line-height: 45px;
       border: 1px solid #999;
       box-sizing: border-box;
+      cursor: pointer;
+      user-select: none;
     }
-    input[disabled] {
-      background-color: #ddd;
+    .cell.locked {
+      background: #ddd;
       font-weight: bold;
+      cursor: default;
     }
-    .incorrect {
-      background-color: #ffcccc;
+    .cell.incorrect {
+      background-color: #fbb;
     }
-    select, button {
-      margin: 5px;
-      padding: 5px 10px;
-      font-size: 14px;
+    .cell.selected {
+      background: #cceeff;
+    }
+    #sudoku .cell:nth-child(3n) {
+      border-right: 2px solid black;
+    }
+    #sudoku .cell:nth-child(n+19):nth-child(-n+27),
+    #sudoku .cell:nth-child(n+46):nth-child(-n+54) {
+      border-bottom: 2px solid black;
+    }
+    #sudoku .cell:nth-child(1),
+    #sudoku .cell:nth-child(4),
+    #sudoku .cell:nth-child(7),
+    #sudoku .cell:nth-child(28),
+    #sudoku .cell:nth-child(31),
+    #sudoku .cell:nth-child(34),
+    #sudoku .cell:nth-child(55),
+    #sudoku .cell:nth-child(58),
+    #sudoku .cell:nth-child(61) {
+      border-left: 2px solid black;
+    }
+    .number-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 35px);
+      gap: 6px;
+      margin-top: 20px;
+    }
+    .number-button {
+      width: 35px;
+      height: 35px;
+      font-size: 18px;
+      text-align: center;
+      line-height: 35px;
+      background: #eee;
+      border: 1px solid #aaa;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .number-button:hover {
+      background: #ddd;
+    }
+    .controls {
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <h1 id="title">Sudoku</h1>
-  <label id="label-difficulty">Difficulty:</label>
-  <select id="difficulty">
-    <option value="easy">Easy</option>
-    <option value="medium">Medium</option>
-    <option value="hard">Hard</option>
-  </select>
-  <label id="label-language">Language:</label>
-  <select id="language" onchange="updateLanguage()">
-    <option value="en">English</option>
-    <option value="pl">Polski</option>
-    <option value="fr">Français</option>
-    <option value="es">Español</option>
-    <option value="it">Italiano</option>
-    <option value="zh">中文</option>
-    <option value="ru">Русский</option>
-    <option value="pt">Português</option>
-  </select>
-  <button id="btn-new" onclick="newGame()">New Game</button>
-  <button id="btn-theme" onclick="toggleTheme()">🌙 Night Mode</button>
-  <div>
-    <span id="label-time">Time:</span> <span id="time">0</span>s |
-    <span id="label-mistakes">Mistakes:</span> <span id="mistakes">0</span>
+<div class="container">
+  <div class="game-panel">
+    <div class="controls">
+      <label>Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <button onclick="newGame()">New Game</button>
+      <button onclick="toggleTheme()">🌙 Night Mode</button>
+    </div>
+    <div>⏱️ Time: <span id="time">0</span>s | ❌ Mistakes: <span id="mistakes">0</span></div>
+    <div id="game-over" style="color: red; margin-top: 10px; font-weight: bold;"></div>
+    <div id="sudoku"></div>
   </div>
-  <div id="sudoku"></div>
-  <div id="game-over" style="font-size: 20px; color: red;"></div>
-
-  <script>
-    const translations = {
-      en: {
-        title: "Sudoku", difficulty: "Difficulty:", time: "Time:",
-        mistakes: "Mistakes:", new: "New Game", theme: "🌙 Night Mode",
-        gameOver: "Game Over! 🛑", language: "Language:"
-      },
-      pl: {
-        title: "Sudoku", difficulty: "Poziom:", time: "Czas:",
-        mistakes: "Błędy:", new: "Nowa gra", theme: "🌙 Tryb nocny",
-        gameOver: "Koniec gry! 🛑", language: "Język:"
-      },
-      fr: {
-        title: "Sudoku", difficulty: "Difficulté:", time: "Temps:",
-        mistakes: "Erreurs:", new: "Nouvelle partie", theme: "🌙 Mode nuit",
-        gameOver: "Fin de partie! 🛑", language: "Langue:"
-      },
-      es: {
-        title: "Sudoku", difficulty: "Dificultad:", time: "Tiempo:",
-        mistakes: "Errores:", new: "Nuevo juego", theme: "🌙 Modo noche",
-        gameOver: "¡Juego terminado! 🛑", language: "Idioma:"
-      },
-      it: {
-        title: "Sudoku", difficulty: "Difficoltà:", time: "Tempo:",
-        mistakes: "Errori:", new: "Nuova partita", theme: "🌙 Modalità notte",
-        gameOver: "Gioco finito! 🛑", language: "Lingua:"
-      },
-      zh: {
-        title: "数独", difficulty: "难度:", time: "时间:",
-        mistakes: "错误数:", new: "新游戏", theme: "🌙 夜间模式",
-        gameOver: "游戏结束! 🛑", language: "语言:"
-      },
-      ru: {
-        title: "Судоку", difficulty: "Сложность:", time: "Время:",
-        mistakes: "Ошибки:", new: "Новая игра", theme: "🌙 Ночной режим",
-        gameOver: "Игра окончена! 🛑", language: "Язык:"
-      },
-      pt: {
-        title: "Sudoku", difficulty: "Dificuldade:", time: "Tempo:",
-        mistakes: "Erros:", new: "Novo jogo", theme: "🌙 Modo noturno",
-        gameOver: "Fim de jogo! 🛑", language: "Idioma:"
-      }
-    };
-
-    function updateLanguage() {
-      const lang = document.getElementById("language").value;
-      const t = translations[lang];
-      document.getElementById("title").innerText = t.title;
-      document.getElementById("label-difficulty").innerText = t.difficulty;
-      document.getElementById("label-time").innerText = t.time;
-      document.getElementById("label-mistakes").innerText = t.mistakes;
-      document.getElementById("btn-new").innerText = t.new;
-      document.getElementById("btn-theme").innerText = t.theme;
-      document.getElementById("label-language").innerText = t.language;
-      document.getElementById("game-over").innerText = "";
-
-      const levels = {
-        en: ["Easy", "Medium", "Hard"],
-        pl: ["Łatwy", "Średni", "Trudny"],
-        fr: ["Facile", "Moyen", "Difficile"],
-        es: ["Fácil", "Medio", "Difícil"],
-        it: ["Facile", "Medio", "Difficile"],
-        zh: ["简单", "中等", "困难"],
-        ru: ["Легкий", "Средний", "Тяжелый"],
-        pt: ["Fácil", "Médio", "Difícil"]
-      };
-      const opts = document.getElementById("difficulty").options;
-      const lbls = levels[lang];
-      for (let i = 0; i < opts.length; i++) {
-        opts[i].text = lbls[i];
-      }
-    }
-
-    let correctBoard = "";
-    let timer = null;
-    let seconds = 0;
-    let mistakeCount = 0;
-
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-    }
-
-    function generateSudoku(difficulty = "easy") {
-      const board = Array.from({ length: 9 }, () => Array(9).fill(0));
-
-      function isSafe(row, col, num) {
-        for (let x = 0; x < 9; x++) {
-          if (board[row][x] === num || board[x][col] === num) return false;
-        }
-        const startRow = row - row % 3, startCol = col - col % 3;
-        for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 3; j++) {
-            if (board[startRow + i][startCol + j] === num) return false;
-          }
-        }
-        return true;
-      }
-
-      function fillBoard() {
-        for (let row = 0; row < 9; row++) {
-          for (let col = 0; col < 9; col++) {
-            if (board[row][col] === 0) {
-              const nums = shuffle([1,2,3,4,5,6,7,8,9]);
-              for (let num of nums) {
-                if (isSafe(row, col, num)) {
-                  board[row][col] = num;
-                  if (fillBoard()) return true;
-                  board[row][col] = 0;
-                }
-              }
-              return false;
-            }
-          }
-        }
-        return true;
-      }
-
-      function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
-      function removeCells(count) {
-        while (count > 0) {
-          const r = Math.floor(Math.random() * 9);
-          const c = Math.floor(Math.random() * 9);
-          if (board[r][c] !== 0) {
-            board[r][c] = 0;
-            count--;
-          }
-        }
-      }
-
-      fillBoard();
-      correctBoard = board.map(r => [...r]);
-
-      const blanks = difficulty === "easy" ? 35 : difficulty === "medium" ? 45 : 55;
-      removeCells(blanks);
-
-      return board.map(r => r.join("")).join("");
-    }
-
-    function newGame() {
-      clearInterval(timer);
-      seconds = 0;
-      document.getElementById("time").innerText = seconds;
-      mistakeCount = 0;
-      document.getElementById("mistakes").innerText = mistakeCount;
-      document.getElementById("game-over").innerText = "";
-
-      const boardStr = generateSudoku(document.getElementById("difficulty").value);
-      const container = document.getElementById("sudoku");
-      container.innerHTML = "";
-
-      for (let i = 0; i < 81; i++) {
-        const input = document.createElement("input");
-        const val = boardStr[i];
-        const row = Math.floor(i / 9);
-        const col = i % 9;
-        if (val !== "0") {
-          input.value = val;
-          input.disabled = true;
-        } else {
-          input.addEventListener("input", () => {
-            const userVal = parseInt(input.value);
-            if (userVal === correctBoard[row][col]) {
-              input.classList.remove("incorrect");
-            } else {
-              input.classList.add("incorrect");
-              mistakeCount++;
-              document.getElementById("mistakes").innerText = mistakeCount;
-              if (mistakeCount >= 3) {
-                document.getElementById("game-over").innerText = translations[document.getElementById("language").value].gameOver;
-                clearInterval(timer);
-                document.querySelectorAll("#sudoku input").forEach(i => i.disabled = true);
-              }
-            }
-          });
-        }
-        container.appendChild(input);
-      }
-
-      timer = setInterval(() => {
-        seconds++;
-        document.getElementById("time").innerText = seconds;
-      }, 1000);
-    }
-
-    window.onload = () => {
-      updateLanguage();
-      newGame();
-    };
-  </script>
-</body>
-</html>
+  <div class="number-pad" id="number-pad"></div>
+</div>
