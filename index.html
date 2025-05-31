@@ -1,331 +1,275 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sudoku</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000;
+      --cell-bg: #fff;
+      --selected-cell: #b3d9ff;
+      --incorrect-cell: #ffb3b3;
     }
+    .dark {
+      --bg-color: #1e1e1e;
+      --text-color: #fff;
+      --cell-bg: #2b2b2b;
+      --selected-cell: #0050a0;
+      --incorrect-cell: #a00000;
+    }
+    * { box-sizing: border-box; }
     body {
       font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
-      padding: 0;
-      background-color: #fff;
-      color: #000;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-    }
-    .top-bar {
+      padding: 20px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      flex-wrap: wrap;
-      padding: 10px 20px;
-      background: #eee;
     }
-    body.dark .top-bar {
-      background: #2a2a2a;
+    .controls {
+      margin-bottom: 20px;
     }
-    select, button {
-      font-size: 14px;
-      padding: 5px;
-    }
-
-    .game-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-
     .board {
       display: grid;
-      grid-template-columns: repeat(9, 80px);
-      background: black;
+      grid-template-columns: repeat(9, 60px);
+      grid-template-rows: repeat(9, 60px);
+      gap: 0;
+      border: 4px solid black;
     }
-
     .cell {
-      width: 80px;
-      height: 80px;
-      background: white;
-      color: black;
-      line-height: 80px;
-      text-align: center;
-      font-size: 28px;
-      cursor: pointer;
-      border: 1px solid #999;
-    }
-
-    body.dark .cell {
-      background: #333;
-      color: white;
-    }
-
-    .cell.selected {
-      background-color: #a2d2ff;
-    }
-
-    body.dark .cell.selected {
-      background-color: #555;
-    }
-
-    .cell.incorrect {
-      background-color: #ff7b7b !important;
-    }
-
-    body.dark .cell.incorrect {
-      background-color: #cc4444 !important;
-    }
-
-    /* Grube linie siatki co 3 pola */
-    .cell:nth-child(9n+1),
-    .cell:nth-child(9n+4),
-    .cell:nth-child(9n+7) {
-      border-left: 3px solid black;
-    }
-    .cell:nth-child(-n+9) {
-      border-top: 3px solid black;
-    }
-    .cell:nth-child(n+19):nth-child(-n+27),
-    .cell:nth-child(n+46):nth-child(-n+54),
-    .cell:nth-child(n+73):nth-child(-n+81) {
-      border-bottom: 1px solid #999;
-    }
-    .cell:nth-child(9n) {
-      border-right: 3px solid black;
-    }
-    .cell:nth-child(n+1):nth-child(-n+9),
-    .cell:nth-child(n+28):nth-child(-n+36),
-    .cell:nth-child(n+55):nth-child(-n+63) {
-      border-bottom: 3px solid black;
-    }
-
-    .side-panel {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .numbers {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .num-btn {
       width: 60px;
       height: 60px;
-      font-size: 22px;
-      cursor: pointer;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: #f0f0f0;
-    }
-
-    body.dark .num-btn {
-      background-color: #444;
-      color: white;
-      border: 1px solid #777;
-    }
-
-    #info {
+      border: 1px solid #999;
       text-align: center;
+      line-height: 60px;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: var(--cell-bg);
+      color: var(--text-color);
+    }
+    .cell:nth-child(3n) { border-right: 2px solid black; }
+    .cell:nth-child(n+19):nth-child(-n+27),
+    .cell:nth-child(n+46):nth-child(-n+54) {
+      border-bottom: 2px solid black;
+    }
+    .cell.selected {
+      background-color: var(--selected-cell);
+    }
+    .cell.incorrect {
+      background-color: var(--incorrect-cell);
+    }
+    .numbers {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .numbers button {
+      margin: 0 5px;
+      width: 50px;
+      height: 50px;
+      font-size: 18px;
+    }
+    .info {
+      margin-top: 20px;
+    }
+    .lang-select {
+      margin-left: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <div>
-      <label for="language">Język:</label>
-      <select id="language">
-        <option value="pl">Polski</option>
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="es">Español</option>
-        <option value="it">Italiano</option>
-        <option value="pt">Português</option>
-        <option value="ru">Русский</option>
-      </select>
-    </div>
-    <div>
-      <label for="difficulty">Poziom:</label>
-      <select id="difficulty">
-        <option value="easy">Łatwy</option>
-        <option value="medium">Średni</option>
-        <option value="hard">Trudny</option>
-      </select>
-    </div>
-    <div>
-      <button id="newGame">Nowa gra</button>
-      <button id="toggleTheme">🌙</button>
-    </div>
+  <div class="controls">
+    <button onclick="newGame()" id="newGameBtn">Nowa gra</button>
+    <button onclick="newPuzzle()" id="newPuzzleBtn">Nowa plansza</button>
+    <select id="difficulty">
+      <option value="easy">Łatwy</option>
+      <option value="medium">Średni</option>
+      <option value="hard">Trudny</option>
+    </select>
+    <button onclick="toggleDarkMode()">🌓</button>
+    <select id="language" class="lang-select" onchange="setLanguage(this.value)">
+      <option value="pl">Polski</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="it">Italiano</option>
+      <option value="ru">Русский</option>
+    </select>
   </div>
 
-  <div class="game-container">
-    <div class="board" id="board"></div>
-    <div class="side-panel">
-      <div class="numbers" id="numbers"></div>
-      <div id="info">
-        <p id="timer">Czas: 0s</p>
-        <p id="mistakes">Błędy: 0/3</p>
-        <p id="status"></p>
-      </div>
-    </div>
+  <div class="board" id="board"></div>
+
+  <div class="numbers">
+    <button onclick="placeNumber(1)">1</button>
+    <button onclick="placeNumber(2)">2</button>
+    <button onclick="placeNumber(3)">3</button>
+    <button onclick="placeNumber(4)">4</button>
+    <button onclick="placeNumber(5)">5</button>
+    <button onclick="placeNumber(6)">6</button>
+    <button onclick="placeNumber(7)">7</button>
+    <button onclick="placeNumber(8)">8</button>
+    <button onclick="placeNumber(9)">9</button>
+  </div>
+
+  <div class="info">
+    <p id="mistakes">Błędy: 0/3</p>
+    <p id="status"></p>
   </div>
 
   <script>
-    const LANGUAGES = {
-      pl: { newGame: "Nowa gra", mistakes: "Błędy", time: "Czas", won: "Wygrałeś!", lost: "Przegrałeś!" },
-      en: { newGame: "New Game", mistakes: "Mistakes", time: "Time", won: "You won!", lost: "You lost!" },
-      fr: { newGame: "Nouvelle partie", mistakes: "Erreurs", time: "Temps", won: "Tu as gagné !", lost: "Tu as perdu !" },
-      es: { newGame: "Nuevo juego", mistakes: "Errores", time: "Tiempo", won: "¡Ganaste!", lost: "¡Perdiste!" },
-      it: { newGame: "Nuova partita", mistakes: "Errori", time: "Tempo", won: "Hai vinto!", lost: "Hai perso!" },
-      pt: { newGame: "Novo jogo", mistakes: "Erros", time: "Tempo", won: "Você venceu!", lost: "Você perdeu!" },
-      ru: { newGame: "Новая игра", mistakes: "Ошибки", time: "Время", won: "Ты выиграл!", lost: "Ты проиграл!" },
-    };
-
-    let boardElement = document.getElementById("board");
-    let numbersElement = document.getElementById("numbers");
-    let timerElement = document.getElementById("timer");
-    let mistakesElement = document.getElementById("mistakes");
-    let statusElement = document.getElementById("status");
-    let languageSelect = document.getElementById("language");
-    let difficultySelect = document.getElementById("difficulty");
-
-    let selectedCell = null;
     let board = [];
     let solution = [];
+    let selectedCell = null;
     let mistakes = 0;
-    let startTime;
-    let timerInterval;
-    let language = "pl";
 
-    function startTimer() {
-      startTime = Date.now();
-      timerInterval = setInterval(() => {
-        const seconds = Math.floor((Date.now() - startTime) / 1000);
-        timerElement.textContent = `${LANGUAGES[language].time}: ${seconds}s`;
-      }, 1000);
-    }
+    const translations = {
+      pl: { newGame: "Nowa gra", newPuzzle: "Nowa plansza", mistakes: "Błędy", win: "Wygrałeś!", lose: "Przegrałeś!" },
+      en: { newGame: "New Game", newPuzzle: "New Puzzle", mistakes: "Mistakes", win: "You win!", lose: "You lost!" },
+      fr: { newGame: "Nouvelle partie", newPuzzle: "Nouveau puzzle", mistakes: "Erreurs", win: "Gagné!", lose: "Perdu!" },
+      es: { newGame: "Nuevo juego", newPuzzle: "Nuevo puzzle", mistakes: "Errores", win: "¡Ganaste!", lose: "¡Perdiste!" },
+      it: { newGame: "Nuova partita", newPuzzle: "Nuovo schema", mistakes: "Errori", win: "Hai vinto!", lose: "Hai perso!" },
+      ru: { newGame: "Новая игра", newPuzzle: "Новая задача", mistakes: "Ошибки", win: "Вы выиграли!", lose: "Вы проиграли!" }
+    };
 
-    function stopTimer() {
-      clearInterval(timerInterval);
-    }
+    let currentLang = "pl";
 
     function setLanguage(lang) {
-      language = lang;
-      document.getElementById("newGame").textContent = LANGUAGES[lang].newGame;
-      mistakesElement.textContent = `${LANGUAGES[lang].mistakes}: ${mistakes}/3`;
+      currentLang = lang;
+      document.getElementById("newGameBtn").textContent = translations[lang].newGame;
+      document.getElementById("newPuzzleBtn").textContent = translations[lang].newPuzzle;
+      document.getElementById("mistakes").textContent = `${translations[lang].mistakes}: ${mistakes}/3`;
     }
 
-    function generateSudoku(difficulty = "easy") {
-      board = Array(9).fill().map(() => Array(9).fill(""));
-      solution = Array(9).fill().map(() => Array(9).fill().map(() => Math.floor(Math.random() * 9) + 1));
-      for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-          if (Math.random() < (difficulty === "easy" ? 0.5 : difficulty === "medium" ? 0.35 : 0.25)) {
-            board[r][c] = solution[r][c];
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function generateFullBoard() {
+      const isValid = (board, row, col, num) => {
+        for (let i = 0; i < 9; i++) {
+          if (board[row][i] === num || board[i][col] === num) return false;
+        }
+        const startRow = Math.floor(row / 3) * 3;
+        const startCol = Math.floor(col / 3) * 3;
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) {
+            if (board[startRow + r][startCol + c] === num) return false;
           }
         }
+        return true;
+      };
+
+      const fillBoard = (board) => {
+        for (let row = 0; row < 9; row++) {
+          for (let col = 0; col < 9; col++) {
+            if (board[row][col] === 0) {
+              const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => 0.5 - Math.random());
+              for (let num of nums) {
+                if (isValid(board, row, col, num)) {
+                  board[row][col] = num;
+                  if (fillBoard(board)) return true;
+                  board[row][col] = 0;
+                }
+              }
+              return false;
+            }
+          }
+        }
+        return true;
+      };
+
+      let newBoard = Array.from({ length: 9 }, () => Array(9).fill(0));
+      fillBoard(newBoard);
+      return newBoard;
+    }
+
+    function createPuzzleFromSolution(solution, difficulty) {
+      const clone = JSON.parse(JSON.stringify(solution));
+      let empties = { easy: 30, medium: 45, hard: 60 }[difficulty];
+      while (empties > 0) {
+        let r = Math.floor(Math.random() * 9);
+        let c = Math.floor(Math.random() * 9);
+        if (clone[r][c] !== 0) {
+          clone[r][c] = 0;
+          empties--;
+        }
       }
+      return clone;
     }
 
     function drawBoard() {
-      boardElement.innerHTML = "";
+      const boardEl = document.getElementById("board");
+      boardEl.innerHTML = "";
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
           const cell = document.createElement("div");
-          cell.classList.add("cell");
-          if (board[r][c] !== "") {
-            cell.textContent = board[r][c];
-            cell.dataset.locked = "true";
-          } else {
-            cell.addEventListener("click", () => selectCell(cell, r, c));
-          }
+          cell.className = "cell";
           cell.dataset.row = r;
           cell.dataset.col = c;
-          boardElement.appendChild(cell);
+          if (board[r][c] !== 0) {
+            cell.textContent = board[r][c];
+            cell.style.pointerEvents = "none";
+          } else {
+            cell.onclick = () => selectCell(cell);
+          }
+          boardEl.appendChild(cell);
         }
       }
     }
 
-    function drawNumbers() {
-      numbersElement.innerHTML = "";
-      for (let i = 1; i <= 9; i++) {
-        const btn = document.createElement("button");
-        btn.classList.add("num-btn");
-        btn.textContent = i;
-        btn.addEventListener("click", () => placeNumber(i));
-        numbersElement.appendChild(btn);
-      }
-    }
-
-    function selectCell(cell, row, col) {
+    function selectCell(cell) {
       if (selectedCell) selectedCell.classList.remove("selected");
       selectedCell = cell;
       cell.classList.add("selected");
     }
 
     function placeNumber(num) {
-      if (!selectedCell || selectedCell.dataset.locked) return;
+      if (!selectedCell) return;
       const row = parseInt(selectedCell.dataset.row);
       const col = parseInt(selectedCell.dataset.col);
       if (solution[row][col] === num) {
         selectedCell.textContent = num;
         selectedCell.classList.remove("incorrect");
-        selectedCell.dataset.locked = "true";
-        selectedCell.removeEventListener("click", () => {});
+        selectedCell.onclick = null;
+        selectedCell = null;
         checkWin();
       } else {
         selectedCell.classList.add("incorrect");
         mistakes++;
-        mistakesElement.textContent = `${LANGUAGES[language].mistakes}: ${mistakes}/3`;
+        document.getElementById("mistakes").textContent = `${translations[currentLang].mistakes}: ${mistakes}/3`;
         if (mistakes >= 3) {
-          statusElement.textContent = LANGUAGES[language].lost;
-          stopTimer();
+          document.getElementById("status").textContent = translations[currentLang].lose;
         }
       }
     }
 
     function checkWin() {
-      const allCells = document.querySelectorAll(".cell");
-      for (const cell of allCells) {
-        if (!cell.dataset.locked) return;
+      const cells = document.querySelectorAll(".cell");
+      for (let cell of cells) {
+        if (cell.textContent === "") return;
       }
-      statusElement.textContent = LANGUAGES[language].won;
-      stopTimer();
+      document.getElementById("status").textContent = translations[currentLang].win;
     }
 
-    document.getElementById("newGame").addEventListener("click", () => {
-      mistakes = 0;
-      mistakesElement.textContent = `${LANGUAGES[language].mistakes}: 0/3`;
-      statusElement.textContent = "";
-      generateSudoku(difficultySelect.value);
+    function newPuzzle() {
+      solution = generateFullBoard();
+      const diff = document.getElementById("difficulty").value;
+      board = createPuzzleFromSolution(solution, diff);
       drawBoard();
-      drawNumbers();
-      startTimer();
-    });
+    }
 
-    languageSelect.addEventListener("change", (e) => {
-      setLanguage(e.target.value);
-    });
+    function newGame() {
+      mistakes = 0;
+      document.getElementById("status").textContent = "";
+      setLanguage(currentLang);
+      newPuzzle();
+    }
 
-    document.getElementById("toggleTheme").addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-    });
-
-    setLanguage(language);
-    generateSudoku("easy");
-    drawBoard();
-    drawNumbers();
-    startTimer();
+    newGame();
   </script>
 </body>
 </html>
