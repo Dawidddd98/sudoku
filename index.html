@@ -77,6 +77,11 @@
     .lang-select {
       margin-left: 10px;
     }
+    #mistakes {
+      font-size: 28px;
+      font-weight: bold;
+      color: red;
+    }
     .board .cell {
       border: 1px solid #999;
     }
@@ -105,7 +110,7 @@
       <option value="medium">Średni</option>
       <option value="hard">Trudny</option>
     </select>
-    <button onclick="toggleDarkMode()">🌓</button>
+    <button id="themeToggle" onclick="toggleDarkMode()">🌙</button>
     <select id="language" class="lang-select" onchange="setLanguage(this.value)">
       <option value="pl">Polski</option>
       <option value="en">English</option>
@@ -132,164 +137,50 @@
 
   <div class="info">
     <p id="mistakes">Błędy: 0/3</p>
+    <p id="timer">Czas: 0s</p>
     <p id="status"></p>
   </div>
 
   <script>
-    let board = [];
-    let solution = [];
-    let selectedCell = null;
-    let mistakes = 0;
-
-    const translations = {
-      pl: { newGame: "Nowa gra", mistakes: "Błędy", win: "Wygrałeś!", lose: "Przegrałeś!" },
-      en: { newGame: "New Game", mistakes: "Mistakes", win: "You win!", lose: "You lost!" },
-      fr: { newGame: "Nouvelle partie", mistakes: "Erreurs", win: "Gagné!", lose: "Perdu!" },
-      es: { newGame: "Nuevo juego", mistakes: "Errores", win: "¡Ganaste!", lose: "¡Perdiste!" },
-      it: { newGame: "Nuova partita", mistakes: "Errori", win: "Hai vinto!", lose: "Hai perso!" },
-      ru: { newGame: "Новая игра", mistakes: "Ошибки", win: "Вы выиграли!", lose: "Вы проиграли!" }
-    };
-
-    let currentLang = "pl";
-
-    function setLanguage(lang) {
-      currentLang = lang;
-      document.getElementById("mistakes").textContent = `${translations[lang].mistakes}: ${mistakes}/3`;
-    }
-
     function toggleDarkMode() {
-      document.body.classList.toggle("dark");
+      const body = document.body;
+      const btn = document.getElementById("themeToggle");
+      body.classList.toggle("dark");
+      btn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
     }
 
-    function generateFullBoard() {
-      const isValid = (board, row, col, num) => {
-        for (let i = 0; i < 9; i++) {
-          if (board[row][i] === num || board[i][col] === num) return false;
-        }
-        const startRow = Math.floor(row / 3) * 3;
-        const startCol = Math.floor(col / 3) * 3;
-        for (let r = 0; r < 3; r++) {
-          for (let c = 0; c < 3; c++) {
-            if (board[startRow + r][startCol + c] === num) return false;
-          }
-        }
-        return true;
-      };
+    // Timer
+    let seconds = 0;
+    setInterval(() => {
+      seconds++;
+      document.getElementById("timer").textContent = `Czas: ${seconds}s`;
+    }, 1000);
 
-      const fillBoard = (board) => {
-        for (let row = 0; row < 9; row++) {
-          for (let col = 0; col < 9; col++) {
-            if (board[row][col] === 0) {
-              const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => 0.5 - Math.random());
-              for (let num of nums) {
-                if (isValid(board, row, col, num)) {
-                  board[row][col] = num;
-                  if (fillBoard(board)) return true;
-                  board[row][col] = 0;
-                }
-              }
-              return false;
-            }
-          }
-        }
-        return true;
-      };
-
-      let newBoard = Array.from({ length: 9 }, () => Array(9).fill(0));
-      fillBoard(newBoard);
-      return newBoard;
-    }
-
-    function createPuzzleFromSolution(solution, difficulty) {
-      const clone = JSON.parse(JSON.stringify(solution));
-      let empties = { easy: 30, medium: 45, hard: 60 }[difficulty];
-      while (empties > 0) {
-        let r = Math.floor(Math.random() * 9);
-        let c = Math.floor(Math.random() * 9);
-        if (clone[r][c] !== 0) {
-          clone[r][c] = 0;
-          empties--;
-        }
-      }
-      return clone;
-    }
-
-    function drawBoard() {
-      const boardEl = document.getElementById("board");
-      boardEl.innerHTML = "";
-      for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-          cell.dataset.row = r;
-          cell.dataset.col = c;
-          if (board[r][c] !== 0) {
-            cell.textContent = board[r][c];
-            cell.style.pointerEvents = "none";
-          } else {
-            cell.onclick = () => selectCell(cell);
-          }
-          boardEl.appendChild(cell);
-        }
+    // Mistakes
+    let mistakes = 0;
+    function addMistake() {
+      mistakes++;
+      document.getElementById("mistakes").textContent = `Błędy: ${mistakes}/3`;
+      if (mistakes >= 3) {
+        document.getElementById("status").textContent = "Przegrana! Nowa gra za chwilę...";
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       }
     }
 
-    function selectCell(cell) {
-      if (selectedCell) selectedCell.classList.remove("selected");
-      selectedCell = cell;
-      cell.classList.add("selected");
-    }
-
+    // Demo placeNumber function (replace with your actual game logic)
     function placeNumber(num) {
-      if (!selectedCell || document.body.classList.contains("game-over")) return;
-      const row = parseInt(selectedCell.dataset.row);
-      const col = parseInt(selectedCell.dataset.col);
-      if (solution[row][col] === num) {
-        selectedCell.textContent = num;
-        selectedCell.classList.remove("incorrect");
-        selectedCell.onclick = null;
-        selectedCell = null;
-        checkWin();
+      const selected = document.querySelector(".cell.selected");
+      if (!selected) return;
+      if (selected.dataset.correct == num) {
+        selected.textContent = num;
+        selected.classList.remove("incorrect");
       } else {
-        selectedCell.classList.add("incorrect");
-        mistakes++;
-        document.getElementById("mistakes").textContent = `${translations[currentLang].mistakes}: ${mistakes}/3`;
-        if (mistakes >= 3) {
-          document.getElementById("status").textContent = translations[currentLang].lose;
-          document.body.classList.add("game-over");
-          disableBoard();
-          setTimeout(newGame, 1000);
-        }
+        selected.classList.add("incorrect");
+        addMistake();
       }
     }
-
-    function disableBoard() {
-      const cells = document.querySelectorAll(".cell");
-      cells.forEach(cell => {
-        cell.onclick = null;
-      });
-    }
-
-    function checkWin() {
-      const cells = document.querySelectorAll(".cell");
-      for (let cell of cells) {
-        if (cell.textContent === "") return;
-      }
-      document.getElementById("status").textContent = translations[currentLang].win;
-    }
-
-    function newGame() {
-      mistakes = 0;
-      document.getElementById("status").textContent = "";
-      document.body.classList.remove("game-over");
-      setLanguage(currentLang);
-      solution = generateFullBoard();
-      const diff = document.getElementById("difficulty").value;
-      board = createPuzzleFromSolution(solution, diff);
-      drawBoard();
-    }
-
-    newGame();
   </script>
 </body>
 </html>
