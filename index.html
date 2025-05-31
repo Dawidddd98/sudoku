@@ -62,6 +62,12 @@
     .cell.incorrect {
       background-color: var(--incorrect-cell);
     }
+    .cell.thick-top {
+      border-top: 3px solid black;
+    }
+    .cell.thick-left {
+      border-left: 3px solid black;
+    }
     .numbers {
       display: flex;
       flex-direction: column;
@@ -88,19 +94,6 @@
       font-size: 36px;
       font-weight: bold;
       color: red;
-    }
-    .board .cell {
-      border: 1px solid #999;
-    }
-    .board .cell:nth-child(3n+1) {
-      border-left: 3px solid black;
-    }
-    .board .cell:nth-child(n+1):nth-child(-n+9) {
-      border-top: 3px solid black;
-    }
-    .board .cell:nth-child(n+19):nth-child(-n+27),
-    .board .cell:nth-child(n+46):nth-child(-n+54) {
-      border-top: 3px solid black;
     }
   </style>
 </head>
@@ -150,8 +143,6 @@
   </div>
 
   <script>
-    // Language and UI logic as before...
-
     const boardElement = document.getElementById("board");
     let selectedCell = null;
 
@@ -184,6 +175,8 @@
         for (let j = 0; j < 9; j++) {
           const cell = document.createElement("div");
           cell.className = "cell";
+          if (i % 3 === 0) cell.classList.add("thick-top");
+          if (j % 3 === 0) cell.classList.add("thick-left");
           cell.dataset.correct = solution[i][j];
           if (puzzle[i][j]) {
             cell.textContent = puzzle[i][j];
@@ -211,7 +204,17 @@
       }
     }
 
-    // Existing functions: setLanguage, updateText, toggleDarkMode, addMistake...
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function addMistake() {
+      // placeholder for mistake handling
+    }
+
+    function setLanguage(lang) {
+      // placeholder for language setting
+    }
 
     generateBoard();
   </script>
