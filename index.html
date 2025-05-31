@@ -20,7 +20,7 @@
     }
     .container {
       display: flex;
-      gap: 30px;
+      gap: 10px;
     }
     .game-panel {
       text-align: center;
@@ -49,7 +49,7 @@
       cursor: default;
     }
     .cell.incorrect {
-      background-color: #fbb;
+      background-color: #f88;
     }
     .cell.selected {
       background: #cceeff;
@@ -63,16 +63,16 @@
     }
     .number-pad {
       display: grid;
-      grid-template-columns: repeat(3, 50px);
-      gap: 5px;
-      margin-top: 20px;
+      grid-template-columns: repeat(3, 45px);
+      gap: 3px;
+      margin-top: 0px;
     }
     .number-button {
-      width: 50px;
-      height: 50px;
-      font-size: 22px;
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
       text-align: center;
-      line-height: 50px;
+      line-height: 45px;
       background: #eee;
       border: 1px solid #aaa;
       cursor: pointer;
@@ -284,13 +284,13 @@ function fillNumber(num) {
   } else {
     mistakes++;
     document.getElementById("mistakes").textContent = mistakes;
-    selectedCell.classList.add("incorrect");
+    const wrongCell = selectedCell;
+    wrongCell.classList.add("incorrect");
     setTimeout(() => {
-      selectedCell.classList.remove("incorrect");
+      wrongCell.classList.remove("incorrect");
     }, 500);
     if (mistakes >= 3) {
-      document.getElementById("game-over").textContent =
-        "❌ " + translations[currentLang].gameOver + " (⏳ 2s)";
+      document.getElementById("game-over").textContent = "❌ " + translations[currentLang].gameOver + " (⏳ 2s)";
       clearInterval(interval);
       setTimeout(() => {
         newGame();
