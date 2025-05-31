@@ -1,123 +1,54 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sudoku by Dawid </title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-  }
-  #container {
-    display: flex;
-    gap: 30px;
-  }
-  table {
-    border-collapse: collapse;
-  }
-  td {
-    border: 1px solid #999;
-    width: 40px;
-    height: 40px;
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-  }
-  td input {
-    width: 100%;
-    height: 100%;
-    font-size: 20px;
-    text-align: center;
-    border: none;
-    outline: none;
-    background-color: transparent;
-    cursor: default;
-    pointer-events: none; /* blokujemy bezpośrednie wpisywanie */
-  }
-  /* Grubsze linie co 3 kratki */
-  td.border-right {
-    border-right: 3px solid black;
-  }
-  td.border-bottom {
-    border-bottom: 3px solid black;
-  }
-  /* Podświetlenie zaznaczonej kratki */
-  td.selected {
-    background-color: #cceeff;
-  }
-  #digitPanel {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  #digitPanel button {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    cursor: pointer;
-    user-select: none;
-  }
-  #info {
-    margin-top: 15px;
-    font-size: 14px;
-  }
-  #controls {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 15px;
-    align-items: center;
-  }
-  select, button {
-    font-size: 16px;
-    padding: 5px 10px;
-  }
-  #messages {
-    margin-top: 15px;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Sudoku Gra</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      padding: 20px;
+    }
+    #game-container {
+      display: flex;
+      flex-direction: row;
+    }
+    #sudoku-grid {
+      border-collapse: collapse;
+    }
+    #sudoku-grid td {
+      border: 1px solid #999;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+    #sudoku-grid input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 18px;
+    }
+    #digit-panel {
+      display: flex;
+      flex-direction: column;
+      margin-left: 20px;
+      align-items: center;
+    }
+    #digit-panel button {
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-<div id="container">
-  <div>
-    <div id="controls">
-      <label for="languageSelect">Język:</label>
-      <select id="languageSelect">
-        <option value="pl" selected>Polski</option>
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="es">Español</option>
-        <option value="ru">Русский</option>
-        <option value="pt">Português</option>
-        <option value="it">Italiano</option>
-      </select>
-
-      <label for="difficultySelect">Poziom:</label>
-      <select id="difficultySelect">
-        <option value="easy">Łatwy</option>
-        <option value="medium">Średni</option>
-        <option value="hard">Trudny</option>
-      </select>
-
-      <button id="startBtn">Start</button>
-      <button id="resetBtn">Reset</button>
-    </div>
-
-    <table id="sudokuGrid"></table>
-
-    <div id="info">
-      <div id="timer">Czas: 00:00</div>
-      <div id="score">Punkty: 0</div>
-      <div id="errors">Błędy: 0</div>
-    </div>
-
-    <div id="messages"></div>
-  </div>
-
-  <div id="digitPanel">
+<div id="game-container">
+  <table id="sudoku-grid"></table>
+  <div id="digit-panel">
     <button data-digit="1">1</button>
     <button data-digit="2">2</button>
     <button data-digit="3">3</button>
@@ -127,457 +58,81 @@
     <button data-digit="7">7</button>
     <button data-digit="8">8</button>
     <button data-digit="9">9</button>
-    <button id="clearBtn" style="margin-top: 20px; background:#f88;">Wyczyść</button>
+    <button id="clearBtn">Wyczyść</button>
   </div>
 </div>
-
+<div>
+  <label for="languageSelect">Język:</label>
+  <select id="languageSelect">
+    <option value="pl">Polski</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="es">Español</option>
+    <option value="ru">Русский</option>
+    <option value="pt">Português</option>
+    <option value="it">Italiano</option>
+  </select>
+  <label for="difficultySelect">Poziom:</label>
+  <select id="difficultySelect">
+    <option value="easy">Latwy</option>
+    <option value="medium">Średni</option>
+    <option value="hard">Trudny</option>
+  </select>
+  <button id="startBtn">Start</button>
+  <button id="resetBtn">Reset</button>
+  <p id="timer"></p>
+  <p id="score"></p>
+  <p id="errors"></p>
+  <p id="messages"></p>
+</div>
 <script>
-  const sudokuGrid = document.getElementById('sudokuGrid');
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const timerDisplay = document.getElementById('timer');
-  const scoreDisplay = document.getElementById('score');
-  const errorsDisplay = document.getElementById('errors');
-  const messagesDisplay = document.getElementById('messages');
-  const languageSelect = document.getElementById('languageSelect');
-  const difficultySelect = document.getElementById('difficultySelect');
-  const digitPanel = document.getElementById('digitPanel');
-  const clearBtn = document.getElementById('clearBtn');
-
   const gridSize = 9;
-  const maxErrors = 3;
-
-  let puzzle = [];
-  let solution = [];
+  let selectedCell = null;
   let errors = 0;
   let score = 0;
   let secondsElapsed = 0;
   let timerInterval = null;
-  let selectedCell = null; // aktualnie zaznaczona kratka
+  const maxErrors = 3;
+  let puzzle = [];
+  let solution = [];
+
+  const sudokuGrid = document.getElementById('sudoku-grid');
+  const digitPanel = document.getElementById('digit-panel');
+  const clearBtn = document.getElementById('clearBtn');
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const difficultySelect = document.getElementById('difficultySelect');
+  const languageSelect = document.getElementById('languageSelect');
+  const timerDisplay = document.getElementById('timer');
+  const scoreDisplay = document.getElementById('score');
+  const errorsDisplay = document.getElementById('errors');
+  const messagesDisplay = document.getElementById('messages');
+
   let currentLang = 'pl';
 
-  // Teksty do tłumaczenia
   const translations = {
-    pl: {
-      languageLabel: "Język:",
-      difficultyLabel: "Poziom:",
-      start: "Start",
-      reset: "Reset",
-      timer: "Czas",
-      score: "Punkty",
-      errors: "Błędy",
-      gameOver: "Koniec gry! Przekroczono limit błędów.",
-      congrats: (score, time) => `Gratulacje! Zdobyłeś ${score} punktów w czasie ${time}.`,
-      levels: { easy: "Łatwy", medium: "Średni", hard: "Trudny" },
-      clear: "Wyczyść"
-    },
-    en: {
-      languageLabel: "Language:",
-      difficultyLabel: "Difficulty:",
-      start: "Start",
-      reset: "Reset",
-      timer: "Time",
-      score: "Score",
-      errors: "Errors",
-      gameOver: "Game Over! Too many mistakes.",
-      congrats: (score, time) => `Congratulations! You scored ${score} points in ${time}.`,
-      levels: { easy: "Easy", medium: "Medium", hard: "Hard" },
-      clear: "Clear"
-    },
-    fr: {
-      languageLabel: "Langue :",
-      difficultyLabel: "Niveau :",
-      start: "Démarrer",
-      reset: "Réinitialiser",
-      timer: "Temps",
-      score: "Score",
-      errors: "Erreurs",
-      gameOver: "Jeu terminé ! Trop d'erreurs.",
-      congrats: (score, time) => `Félicitations ! Vous avez ${score} points en ${time}.`,
-      levels: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
-      clear: "Effacer"
-    },
-    es: {
-      languageLabel: "Idioma:",
-      difficultyLabel: "Dificultad:",
-      start: "Comenzar",
-      reset: "Reiniciar",
-      timer: "Tiempo",
-      score: "Puntaje",
-      errors: "Errores",
-      gameOver: "¡Juego terminado! Demasiados errores.",
-      congrats: (score, time) => `¡Felicidades! Has conseguido ${score} puntos en ${time}.`,
-      levels: { easy: "Fácil", medium: "Medio", hard: "Difícil" },
-      clear: "Borrar"
-    },
-    ru: {
-      languageLabel: "Язык:",
-      difficultyLabel: "Уровень:",
-      start: "Старт",
-      reset: "Сброс",
-      timer: "Время",
-      score: "Очки",
-      errors: "Ошибки",
-      gameOver: "Игра окончена! Слишком много ошибок.",
-      congrats: (score, time) => `Поздравляем! Вы набрали ${score} очков за ${time}.`,
-      levels: { easy: "Легко", medium: "Средне", hard: "Сложно" },
-      clear: "Очистить"
-    },
-    pt: {
-      languageLabel: "Idioma:",
-      difficultyLabel: "Dificuldade:",
-      start: "Iniciar",
-      reset: "Reiniciar",
-      timer: "Tempo",
-      score: "Pontuação",
-      errors: "Erros",
-      gameOver: "Fim de jogo! Muitos erros.",
-      congrats: (score, time) => `Parabéns! Você fez ${score} pontos em ${time}.`,
-      levels: { easy: "Fácil", medium: "Médio", hard: "Difícil" },
-      clear: "Limpar"
-    },
-    it: {
-      languageLabel: "Lingua:",
-      difficultyLabel: "Difficoltà:",
-      start: "Avvia",
-      reset: "Resetta",
-      timer: "Tempo",
-      score: "Punti",
-      errors: "Errori",
-      gameOver: "Fine gioco! Troppe errori.",
-      congrats: (score, time) => `Congratulazioni! Hai totalizzato ${score} punti in ${time}.`,
-      levels: { easy: "Facile", medium: "Medio", hard: "Difficile" },
-      clear: "Pulisci"
-    }
+    pl: { timer: 'Czas', score: 'Punkty', errors: 'Błędy', start: 'Start', reset: 'Reset', clear: 'Wyczyść', gameOver: 'Koniec gry!', congrats: (score, time) => `Gratulacje! Punkty: ${score}, Czas: ${time}`, levels: { easy: 'Latwy', medium: 'Średni', hard: 'Trudny' }, languageLabel: 'Język:', difficultyLabel: 'Poziom:' },
+    en: { timer: 'Time', score: 'Score', errors: 'Errors', start: 'Start', reset: 'Reset', clear: 'Clear', gameOver: 'Game Over!', congrats: (score, time) => `Congratulations! Score: ${score}, Time: ${time}`, levels: { easy: 'Easy', medium: 'Medium', hard: 'Hard' }, languageLabel: 'Language:', difficultyLabel: 'Difficulty:' },
+    fr: { timer: 'Temps', score: 'Score', errors: 'Erreurs', start: 'Démarrer', reset: 'Réinitialiser', clear: 'Effacer', gameOver: 'Fin de jeu!', congrats: (score, time) => `Félicitations! Score: ${score}, Temps: ${time}`, levels: { easy: 'Facile', medium: 'Moyen', hard: 'Difficile' }, languageLabel: 'Langue:', difficultyLabel: 'Difficulté:' },
+    es: { timer: 'Tiempo', score: 'Puntaje', errors: 'Errores', start: 'Iniciar', reset: 'Reiniciar', clear: 'Borrar', gameOver: 'Juego Terminado!', congrats: (score, time) => `¡Felicidades! Puntaje: ${score}, Tiempo: ${time}`, levels: { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' }, languageLabel: 'Idioma:', difficultyLabel: 'Dificultad:' },
+    ru: { timer: 'Время', score: 'Счет', errors: 'Ошибки', start: 'Старт', reset: 'Сброс', clear: 'Удалить', gameOver: 'Игра окончена!', congrats: (score, time) => `Поздравляем! Счет: ${score}, Время: ${time}`, levels: { easy: 'Легкий', medium: 'Средний', hard: 'Сложный' }, languageLabel: 'Язык:', difficultyLabel: 'Сложность:' },
+    pt: { timer: 'Tempo', score: 'Pontuação', errors: 'Erros', start: 'Começar', reset: 'Redefinir', clear: 'Limpar', gameOver: 'Fim do jogo!', congrats: (score, time) => `Parabéns! Pontuação: ${score}, Tempo: ${time}`, levels: { easy: 'Fácil', medium: 'Médio', hard: 'Difícil' }, languageLabel: 'Idioma:', difficultyLabel: 'Dificuldade:' },
+    it: { timer: 'Tempo', score: 'Punti', errors: 'Errori', start: 'Inizia', reset: 'Reset', clear: 'Cancella', gameOver: 'Gioco finito!', congrats: (score, time) => `Congratulazioni! Punti: ${score}, Tempo: ${time}`, levels: { easy: 'Facile', medium: 'Medio', hard: 'Difficile' }, languageLabel: 'Lingua:', difficultyLabel: 'Difficoltà:' }
   };
 
-  // Przykładowe plansze (łatwy poziom)
-  const puzzlesData = {
-    easy: {
-      puzzle: [
-        [5,3,null,null,7,null,null,null,null],
-        [6,null,null,1,9,5,null,null,null],
-        [null,9,8,null,null,null,null,6,null],
-        [8,null,null,null,6,null,null,null,3],
-        [4,null,null,8,null,3,null,null,1],
-        [7,null,null,null,2,null,null,null,6],
-        [null,6,null,null,null,null,2,8,null],
-        [null,null,null,4,1,9,null,null,5],
-        [null,null,null,null,8,null,null,7,9]
-      ],
-      solution: [
-        [5,3,4,6,7,8,9,1,2],
-        [6,7,2,1,9,5,3,4,8],
-        [1,9,8,3,4,2,5,6,7],
-        [8,5,9,7,6,1,4,2,3],
-        [4,2,6,8,5,3,7,9,1],
-        [7,1,3,9,2,4,8,5,6],
-        [9,6,1,5,3,7,2,8,4],
-        [2,8,7,4,1,9,6,3,5],
-        [3,4,5,2,8,6,1,7,9]
-      ]
-    },
-    medium: {
-      puzzle: [
-        [null,2,null,6,null,null,null,null,null],
-        [null,null,null,null,null,3,null,9,5],
-        [null,null,7,null,null,null,null,6,null],
-        [null,null,null,null,9,null,2,null,null],
-        [null,null,8,null,null,null,4,null,null],
-        [null,null,1,null,5,null,null,null,null],
-        [null,6,null,null,null,null,7,null,null],
-        [9,1,null,4,null,null,null,null,null],
-        [null,null,null,null,null,8,null,1,null]
-      ],
-      solution: [
-        [5,2,4,6,8,9,7,3,1],
-        [8,2,1,4,3,7,5,9,6],
-        [4,9,6,8,5,2,3,1,7],
-        [7,3,5,9,6,1,8,2,4],
-        [5,8,9,7,1,3,4,6,2],
-        [3,1,7,2,4,6,9,8,5],
-        [6,4,2,5,9,8,1,7,3],
-        [9,1,8,4,7,5,6,2,3],
-        [2,7,3,1,6,8,5,4,9]
-      ]
-    },
-    hard: {
-      puzzle: [
-        [null,null,null,null,7,null,null,null,null],
-        [6,null,null,1,null,5,null,null,9],
-        [null,9,null,null,null,null,null,6,null],
-        [8,null,null,null,6,null,null,null,3],
-        [4,null,null,8,null,3,null,null,1],
-        [7,null,null,null,2,null,null,null,6],
-        [null,6,null,null,null,null,null,8,null],
-        [null,null,null,4,null,9,null,null,5],
-        [null,null,null,null,8,null,null,null,null]
-      ],
-      solution: [
-        [1,4,2,3,7,6,9,5,8],
-        [6,7,9,1,8,5,4,2,3],
-        [5,9,8,2,4,3,7,6,1],
-        [8,1,5,7,6,4,2,9,3],
-        [4,2,7,8,9,3,1,5,6],
-        [7,3,6,9,2,1,5,8,4],
-        [9,6,1,5,3,7,8,4,2],
-        [2,8,3,4,1,9,6,7,5],
-        [3,5,4,6,0,2,0,1,7]
-      ]
-    }
-  };
-
-  // Formatowanie czasu mm:ss
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  }
-
-  function startTimer() {
-    clearInterval(timerInterval);
-    secondsElapsed = 0;
-    timerDisplay.textContent = `${translations[currentLang].timer}: 00:00`;
-    timerInterval = setInterval(() => {
-      secondsElapsed++;
-      timerDisplay.textContent = `${translations[currentLang].timer}: ` + formatTime(secondsElapsed);
-      updateScore();
-    }, 1000);
-  }
-
-  function stopTimer() {
-    clearInterval(timerInterval);
-  }
-
-  // Tworzenie planszy sudoku w tabeli
-  function createGrid() {
-    sudokuGrid.innerHTML = '';
-    for (let r = 0; r < gridSize; r++) {
-      const row = document.createElement('tr');
-      for (let c = 0; c < gridSize; c++) {
-        const cell = document.createElement('td');
-        // grube linie 3x3
-        if ((c+1) % 3 === 0 && c !== 8) cell.classList.add('border-right');
-        if ((r+1) % 3 === 0 && r !== 8) cell.classList.add('border-bottom');
-
-        // input niewpisywalny bezpośrednio (będziemy wpisywać tylko przez panel cyfr)
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.maxLength = 1;
-        input.dataset.row = r;
-        input.dataset.col = c;
-        input.readOnly = true; // zablokuj wpisywanie klawiaturą
-        input.value = '';
-        input.style.color = 'black';
-        input.dataset.isError = 'false';
-
-        cell.appendChild(input);
-
-        // kliknięcie na komórkę wybiera ją (jeśli nie jest fixed)
-        cell.addEventListener('click', () => {
-          if (errors >= maxErrors) return; // blokuj po przegranej
-          if (input.disabled) return; // nie można zaznaczyć komórki z gotową cyfrą
-
-          // usuń zaznaczenie poprzednie
-          if (selectedCell) selectedCell.classList.remove('selected');
-          selectedCell = cell;
-          cell.classList.add('selected');
-        });
-
-        row.appendChild(cell);
-      }
-      sudokuGrid.appendChild(row);
-    }
-  }
-
-  // Wypełnianie planszy wstępnie danymi
-  function fillGrid() {
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const input = sudokuGrid.rows[r].cells[c].firstChild;
-        if (puzzle[r][c] !== null) {
-          input.value = puzzle[r][c];
-          input.disabled = true; // blokuj edycję pól startowych
-          input.style.color = 'black';
-          input.dataset.isError = 'false';
-        } else {
-          input.value = '';
-          input.disabled = false;
-          input.style.color = 'black';
-          input.dataset.isError = 'false';
-        }
-      }
-    }
-    selectedCell = null;
-  }
-
-  // Sprawdzenie czy wpisana cyfra jest poprawna
-  function checkCell(row, col, val) {
-    const input = sudokuGrid.rows[row].cells[col].firstChild;
-    if (solution[row][col] === val) {
-      input.style.color = 'green';
-      if (input.dataset.isError === 'true') {
-        errors = Math.max(errors - 1, 0);
-        input.dataset.isError = 'false';
-      }
-    } else {
-      input.style.color = 'red';
-      if (input.dataset.isError !== 'true') {
-        errors++;
-        input.dataset.isError = 'true';
-      }
-    }
-    errorsDisplay.textContent = `${translations[currentLang].errors}: ${errors}`;
-    updateScore();
-
-    if (errors >= maxErrors) {
-      gameOver();
-    }
-  }
-
-  // Aktualizacja wyniku na podstawie czasu i błędów
   function updateScore() {
-    const newScore = Math.max(1000 - secondsElapsed * 2 - errors * 100, 0);
+    if (errors >= maxErrors) return;
+    const timePenalty = Math.floor(secondsElapsed / 60) * 50;
+    const levelPenalty = {
+      easy: 0,
+      medium: 100,
+      hard: 200
+    }[difficultySelect.value] || 0;
+    let baseScore = 500;
+    let newScore = Math.max(baseScore - timePenalty - levelPenalty - errors * 100, 0);
     score = newScore;
     scoreDisplay.textContent = `${translations[currentLang].score}: ${score}`;
   }
-
-  // Sprawdzenie czy gra została ukończona
-  function checkWin() {
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const input = sudokuGrid.rows[r].cells[c].firstChild;
-        if (input.value == '') return false;
-        if (parseInt(input.value) !== solution[r][c]) return false;
-      }
-    }
-    return true;
-  }
-
-  function gameOver() {
-    stopTimer();
-    messagesDisplay.textContent = translations[currentLang].gameOver;
-    // zablokuj edycję planszy
-    for(let r=0; r<gridSize; r++) {
-      for(let c=0; c<gridSize; c++) {
-        sudokuGrid.rows[r].cells[c].firstChild.disabled = true;
-      }
-    }
-    selectedCell = null;
-  }
-
-  function congrats() {
-    stopTimer();
-    messagesDisplay.textContent = translations[currentLang].congrats(score, formatTime(secondsElapsed));
-    selectedCell = null;
-  }
-
-  // Resetowanie gry (ustawia planszę na startową)
-  function resetGame() {
-    errors = 0;
-    score = 0;
-    secondsElapsed = 0;
-    messagesDisplay.textContent = '';
-    errorsDisplay.textContent = `${translations[currentLang].errors}: 0`;
-    scoreDisplay.textContent = `${translations[currentLang].score}: 0`;
-    timerDisplay.textContent = `${translations[currentLang].timer}: 00:00`;
-    stopTimer();
-    fillGrid();
-  }
-
-  // Ustawienie planszy wg poziomu trudności
-  function loadPuzzle(level) {
-    puzzle = JSON.parse(JSON.stringify(puzzlesData[level].puzzle));
-    solution = JSON.parse(JSON.stringify(puzzlesData[level].solution));
-  }
-
-  // Zmiana języka tekstów
-  function updateLanguageTexts() {
-    document.querySelector('label[for="languageSelect"]').textContent = translations[currentLang].languageLabel;
-    document.querySelector('label[for="difficultySelect"]').textContent = translations[currentLang].difficultyLabel;
-    startBtn.textContent = translations[currentLang].start;
-    resetBtn.textContent = translations[currentLang].reset;
-    clearBtn.textContent = translations[currentLang].clear;
-
-    // Update options difficulty names
-    for (const option of difficultySelect.options) {
-      option.textContent = translations[currentLang].levels[option.value];
-    }
-
-    timerDisplay.textContent = `${translations[currentLang].timer}: 00:00`;
-    scoreDisplay.textContent = `${translations[currentLang].score}: 0`;
-    errorsDisplay.textContent = `${translations[currentLang].errors}: 0`;
-  }
-
-  // Wpisz cyfrę do zaznaczonej kratki
-  function enterDigit(digit) {
-    if (!selectedCell) return;
-    if (errors >= maxErrors) return;
-
-    const input = selectedCell.firstChild;
-    if (input.disabled) return;
-
-    input.value = digit;
-
-    const row = parseInt(input.dataset.row);
-    const col = parseInt(input.dataset.col);
-
-    checkCell(row, col, parseInt(digit));
-
-    if (checkWin()) {
-      congrats();
-    }
-  }
-
-  // Wyczyść zaznaczoną kratkę
-  function clearSelectedCell() {
-    if (!selectedCell) return;
-    if (errors >= maxErrors) return;
-    const input = selectedCell.firstChild;
-    if (input.disabled) return;
-
-    input.value = '';
-    if (input.dataset.isError === 'true') {
-      errors = Math.max(errors - 1, 0);
-      errorsDisplay.textContent = `${translations[currentLang].errors}: ${errors}`;
-      input.dataset.isError = 'false';
-    }
-    input.style.color = 'black';
-  }
-
-  // Inicjalizacja
-  function init() {
-    createGrid();
-    updateLanguageTexts();
-
-    startBtn.addEventListener('click', () => {
-      loadPuzzle(difficultySelect.value);
-      resetGame();
-      startTimer();
-    });
-
-    resetBtn.addEventListener('click', () => {
-      resetGame();
-    });
-
-    languageSelect.addEventListener('change', () => {
-      currentLang = languageSelect.value;
-      updateLanguageTexts();
-    });
-
-    // Obsługa kliknięć na cyfry w panelu
-    for (const btn of digitPanel.querySelectorAll('button[data-digit]')) {
-      btn.addEventListener('click', () => {
-        enterDigit(btn.dataset.digit);
-      });
-    }
-
-    clearBtn.addEventListener('click', () => {
-      clearSelectedCell();
-    });
-  }
-
-  init();
 </script>
 </body>
 </html>
