@@ -1,1 +1,242 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000;
+      --cell-bg: #fff;
+      --selected-cell: #b3d9ff;
+      --incorrect-cell: #ffb3b3;
+    }
+    .dark {
+      --bg-color: #1e1e1e;
+      --text-color: #fff;
+      --cell-bg: #2b2b2b;
+      --selected-cell: #0050a0;
+      --incorrect-cell: #a00000;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .controls {
+      margin-bottom: 20px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(9, 80px);
+      grid-template-rows: repeat(9, 80px);
+      gap: 0;
+      border: 4px solid black;
+      margin-top: 40px;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #999;
+      text-align: center;
+      line-height: 80px;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: var(--cell-bg);
+      color: var(--text-color);
+    }
+    .cell.selected {
+      background-color: var(--selected-cell);
+    }
+    .cell.incorrect {
+      background-color: var(--incorrect-cell);
+    }
+    .numbers {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      max-width: 720px;
+    }
+    .numbers button {
+      width: 70px;
+      height: 70px;
+      font-size: 22px;
+      margin: 5px;
+    }
+    .info {
+      margin-top: 20px;
+    }
+    .lang-select {
+      margin-left: 10px;
+    }
+    #mistakes {
+      font-size: 36px;
+      font-weight: bold;
+      color: red;
+    }
+    .board .cell {
+      border: 1px solid #999;
+    }
+    .board .cell:nth-child(3n) {
+      border-right: 3px solid black;
+    }
+    .board .cell:nth-child(9n) {
+      border-right: 3px solid black;
+    }
+    .board .cell:nth-child(n+1):nth-child(-n+9),
+    .board .cell:nth-child(n+28):nth-child(-n+36),
+    .board .cell:nth-child(n+55):nth-child(-n+63) {
+      border-bottom: 3px solid black;
+    }
+    .board .cell:nth-child(-n+9) {
+      border-top: 3px solid black;
+    }
+    .board .cell:nth-child(9n+1),
+    .board .cell:nth-child(9n+4),
+    .board .cell:nth-child(9n+7) {
+      border-left: 3px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <select id="difficulty">
+      <option value="easy">Łatwy</option>
+      <option value="medium">Średni</option>
+      <option value="hard">Trudny</option>
+    </select>
+    <button id="themeToggle" onclick="toggleDarkMode()">🌙</button>
+    <select id="language" class="lang-select" onchange="setLanguage(this.value)">
+      <option value="pl">Polski</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="it">Italiano</option>
+      <option value="ru">Русский</option>
+    </select>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="numbers">
+    <button onclick="placeNumber(1)">1</button>
+    <button onclick="placeNumber(2)">2</button>
+    <button onclick="placeNumber(3)">3</button>
+    <button onclick="placeNumber(4)">4</button>
+    <button onclick="placeNumber(5)">5</button>
+    <button onclick="placeNumber(6)">6</button>
+    <button onclick="placeNumber(7)">7</button>
+    <button onclick="placeNumber(8)">8</button>
+    <button onclick="placeNumber(9)">9</button>
+  </div>
+
+  <div class="info">
+    <p id="mistakes">Błędy: 0/3</p>
+    <p id="timer">Czas: 0s</p>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const translations = {
+      pl: {
+        mistakes: "Błędy",
+        time: "Czas",
+        lost: "Przegrana! Nowa gra za chwilę...",
+        levels: { easy: "Łatwy", medium: "Średni", hard: "Trudny" }
+      },
+      en: {
+        mistakes: "Mistakes",
+        time: "Time",
+        lost: "You lost! New game in a moment...",
+        levels: { easy: "Easy", medium: "Medium", hard: "Hard" }
+      },
+      fr: {
+        mistakes: "Fautes",
+        time: "Temps",
+        lost: "Perdu ! Nouvelle partie bientôt...",
+        levels: { easy: "Facile", medium: "Moyen", hard: "Difficile" }
+      },
+      es: {
+        mistakes: "Errores",
+        time: "Tiempo",
+        lost: "¡Perdiste! Nueva partida pronto...",
+        levels: { easy: "Fácil", medium: "Medio", hard: "Difícil" }
+      },
+      it: {
+        mistakes: "Errori",
+        time: "Tempo",
+        lost: "Hai perso! Nuova partita tra poco...",
+        levels: { easy: "Facile", medium: "Medio", hard: "Difficile" }
+      },
+      ru: {
+        mistakes: "Ошибки",
+        time: "Время",
+        lost: "Вы проиграли! Новая игра скоро...",
+        levels: { easy: "Легкий", medium: "Средний", hard: "Сложный" }
+      }
+    };
+
+    let currentLang = "pl";
+    function setLanguage(lang) {
+      currentLang = lang;
+      updateText();
+      const levelTexts = translations[lang].levels;
+      const difficultySelect = document.getElementById("difficulty");
+      difficultySelect.options[0].textContent = levelTexts.easy;
+      difficultySelect.options[1].textContent = levelTexts.medium;
+      difficultySelect.options[2].textContent = levelTexts.hard;
+    }
+
+    function updateText() {
+      document.getElementById("mistakes").textContent = `${translations[currentLang].mistakes}: ${mistakes}/3`;
+      document.getElementById("timer").textContent = `${translations[currentLang].time}: ${seconds}s`;
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      const btn = document.getElementById("themeToggle");
+      body.classList.toggle("dark");
+      btn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
+    }
+
+    let seconds = 0;
+    setInterval(() => {
+      seconds++;
+      updateText();
+    }, 1000);
+
+    let mistakes = 0;
+    function addMistake() {
+      mistakes++;
+      updateText();
+      if (mistakes >= 3) {
+        document.getElementById("status").textContent = translations[currentLang].lost;
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      }
+    }
+
+    function placeNumber(num) {
+      const selected = document.querySelector(".cell.selected");
+      if (!selected) return;
+      if (selected.dataset.correct == num) {
+        selected.textContent = num;
+        selected.classList.remove("incorrect");
+      } else {
+        selected.classList.add("incorrect");
+        addMistake();
+      }
+    }
+  </script>
+</body>
+</html>
 
