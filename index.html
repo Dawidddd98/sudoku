@@ -32,6 +32,7 @@
       display: grid;
       grid-template-columns: repeat(9, 40px);
       gap: 1px;
+      border: 3px solid #333;
     }
 
     #sudoku-board input {
@@ -99,16 +100,16 @@
 </head>
 <body>
   <div id="controls">
-    <button onclick="generateGameBoard()">New Game</button>
+    <button id="new-game">Nowa gra</button>
     <select id="difficulty-select">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
+      <option value="easy">Łatwy</option>
+      <option value="medium" selected>Średni</option>
+      <option value="hard">Trudny</option>
     </select>
-    <button id="hint-btn">Hint</button>
-    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    <div>Errors: <span id="errors">0</span></div>
-    <div>Timer: <span id="timer">00:00</span></div>
+    <button id="hint-btn">Podpowiedź</button>
+    <button onclick="toggleDarkMode()">Tryb ciemny</button>
+    <div>Błędy: <span id="errors">0</span></div>
+    <div>Czas: <span id="timer">00:00</span></div>
   </div>
 
   <div id="sudoku-board"></div>
@@ -163,7 +164,7 @@
     function endGame(victory) {
       clearInterval(timerInterval);
       const message = document.getElementById('message');
-      message.textContent = victory ? 'You Win!' : 'You Lost!';
+      message.textContent = victory ? 'Wygrana!' : 'Przegrana!';
       setTimeout(() => {
         message.textContent = '';
         generateGameBoard();
@@ -330,6 +331,11 @@
 
     document.getElementById('hint-btn').addEventListener('click', () => {
       giveHint();
+    });
+
+    document.getElementById('new-game').addEventListener('click', () => {
+      generateGameBoard();
+      startTimer();
     });
 
     generateGameBoard();
