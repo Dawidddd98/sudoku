@@ -68,6 +68,7 @@
       grid-template-columns: repeat(3, 70px);
       gap: 8px;
       margin-left: 5px;
+      margin-top: 50px;
     }
     .number-button {
       width: 70px;
@@ -125,13 +126,13 @@ let timer = 0;
 let interval;
 
 const translations = {
-  en: { difficulty: "Difficulty:", newGame: "New Game", nightMode: "Night Mode", time: "Time", mistakes: "Mistakes", gameOver: "Game Over!", congrats: "Congratulations! You won!" },
-  pl: { difficulty: "Poziom trudności:", newGame: "Nowa gra", nightMode: "Tryb nocny", time: "Czas", mistakes: "Błędy", gameOver: "Koniec gry!", congrats: "Gratulacje! Ukończyłeś grę!" },
-  fr: { difficulty: "Difficulté:", newGame: "Nouvelle partie", nightMode: "Mode nuit", time: "Temps", mistakes: "Erreurs", gameOver: "Jeu terminé!", congrats: "Félicitations ! Vous avez gagné !" },
-  es: { difficulty: "Dificultad:", newGame: "Nuevo juego", nightMode: "Modo nocturno", time: "Tiempo", mistakes: "Errores", gameOver: "¡Juego terminado!", congrats: "¡Felicidades! Has ganado." },
-  it: { difficulty: "Difficoltà:", newGame: "Nuova partita", nightMode: "Modalità notturna", time: "Tempo", mistakes: "Errori", gameOver: "Gioco finito!", congrats: "Congratulazioni! Hai vinto!" },
-  ru: { difficulty: "Сложность:", newGame: "Новая игра", nightMode: "Ночной режим", time: "Время", mistakes: "Ошибки", gameOver: "Игра окончена!", congrats: "Поздравляем! Вы выиграли!" },
-  zh: { difficulty: "难度：", newGame: "新游戏", nightMode: "夜间模式", time: "时间", mistakes: "错误", gameOver: "游戏结束！", congrats: "恭喜你！你赢了！" }
+  en: { difficulty: "Difficulty:", newGame: "New Game", nightMode: "Night Mode", time: "Time", mistakes: "Mistakes", gameOver: "Game Over!", congrats: "Congratulations! You won!", levels: ["Easy", "Medium", "Hard"] },
+  pl: { difficulty: "Poziom trudności:", newGame: "Nowa gra", nightMode: "Tryb nocny", time: "Czas", mistakes: "Błędy", gameOver: "Koniec gry!", congrats: "Gratulacje! Ukończyłeś grę!", levels: ["Łatwy", "Średni", "Trudny"] },
+  fr: { difficulty: "Difficulté:", newGame: "Nouvelle partie", nightMode: "Mode nuit", time: "Temps", mistakes: "Erreurs", gameOver: "Jeu terminé!", congrats: "Félicitations ! Vous avez gagné !", levels: ["Facile", "Moyen", "Difficile"] },
+  es: { difficulty: "Dificultad:", newGame: "Nuevo juego", nightMode: "Modo nocturno", time: "Tiempo", mistakes: "Errores", gameOver: "¡Juego terminado!", congrats: "¡Felicidades! Has ganado.", levels: ["Fácil", "Medio", "Difícil"] },
+  it: { difficulty: "Difficoltà:", newGame: "Nuova partita", nightMode: "Modalità notturna", time: "Tempo", mistakes: "Errori", gameOver: "Gioco finito!", congrats: "Congratulazioni! Hai vinto!", levels: ["Facile", "Medio", "Difficile"] },
+  ru: { difficulty: "Сложность:", newGame: "Новая игра", nightMode: "Ночной режим", time: "Время", mistakes: "Ошибки", gameOver: "Игра окончена!", congrats: "Поздравляем! Вы выиграли!", levels: ["Легкий", "Средний", "Сложный"] },
+  zh: { difficulty: "难度：", newGame: "新游戏", nightMode: "夜间模式", time: "时间", mistakes: "错误", gameOver: "游戏结束！", congrats: "恭喜你！你赢了！", levels: ["简单", "中等", "困难"] }
 };
 
 let currentLang = "en";
@@ -144,6 +145,11 @@ function setLanguage(lang) {
   document.getElementById('night-btn').textContent = "🌙 " + t.nightMode;
   document.getElementById('time-label').textContent = t.time + ": ";
   document.getElementById('mistake-label').textContent = t.mistakes + ": ";
+
+  const diff = document.getElementById("difficulty");
+  t.levels.forEach((label, i) => {
+    diff.options[i].textContent = label;
+  });
 }
 
 function toggleTheme() {
@@ -315,5 +321,3 @@ window.onload = newGame;
 </script>
 </body>
 </html>
-
-
