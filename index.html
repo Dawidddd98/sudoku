@@ -27,17 +27,17 @@
     }
     #sudoku {
       display: grid;
-      grid-template-columns: repeat(9, 45px);
-      grid-template-rows: repeat(9, 45px);
+      grid-template-columns: repeat(9, 60px);
+      grid-template-rows: repeat(9, 60px);
       border: 2px solid black;
       margin: 10px auto;
     }
     .cell {
-      width: 45px;
-      height: 45px;
-      font-size: 20px;
+      width: 60px;
+      height: 60px;
+      font-size: 26px;
       text-align: center;
-      line-height: 45px;
+      line-height: 60px;
       border: 1px solid #999;
       box-sizing: border-box;
       cursor: pointer;
@@ -63,16 +63,16 @@
     }
     .number-pad {
       display: grid;
-      grid-template-columns: repeat(3, 35px);
+      grid-template-columns: repeat(3, 50px);
       gap: 5px;
       margin-top: 20px;
     }
     .number-button {
-      width: 35px;
-      height: 35px;
-      font-size: 18px;
+      width: 50px;
+      height: 50px;
+      font-size: 22px;
       text-align: center;
-      line-height: 35px;
+      line-height: 50px;
       background: #eee;
       border: 1px solid #aaa;
       cursor: pointer;
@@ -123,13 +123,13 @@ let timer = 0;
 let interval;
 
 const translations = {
-  en: { difficulty: "Difficulty:", newGame: "New Game", nightMode: "Night Mode", time: "Time", mistakes: "Mistakes", gameOver: "Game Over!" },
-  pl: { difficulty: "Poziom trudności:", newGame: "Nowa gra", nightMode: "Tryb nocny", time: "Czas", mistakes: "Błędy", gameOver: "Koniec gry!" },
-  fr: { difficulty: "Difficulté:", newGame: "Nouvelle partie", nightMode: "Mode nuit", time: "Temps", mistakes: "Erreurs", gameOver: "Jeu terminé!" },
-  es: { difficulty: "Dificultad:", newGame: "Nuevo juego", nightMode: "Modo nocturno", time: "Tiempo", mistakes: "Errores", gameOver: "¡Juego terminado!" },
-  it: { difficulty: "Difficoltà:", newGame: "Nuova partita", nightMode: "Modalità notturna", time: "Tempo", mistakes: "Errori", gameOver: "Gioco finito!" },
-  ru: { difficulty: "Сложность:", newGame: "Новая игра", nightMode: "Ночной режим", time: "Время", mistakes: "Ошибки", gameOver: "Игра окончена!" },
-  zh: { difficulty: "难度：", newGame: "新游戏", nightMode: "夜间模式", time: "时间", mistakes: "错误", gameOver: "游戏结束！" }
+  en: { difficulty: "Difficulty:", newGame: "New Game", nightMode: "Night Mode", time: "Time", mistakes: "Mistakes", gameOver: "Game Over!", congrats: "Congratulations! You won!" },
+  pl: { difficulty: "Poziom trudności:", newGame: "Nowa gra", nightMode: "Tryb nocny", time: "Czas", mistakes: "Błędy", gameOver: "Koniec gry!", congrats: "Gratulacje! Ukończyłeś grę!" },
+  fr: { difficulty: "Difficulté:", newGame: "Nouvelle partie", nightMode: "Mode nuit", time: "Temps", mistakes: "Erreurs", gameOver: "Jeu terminé!", congrats: "Félicitations ! Vous avez gagné !" },
+  es: { difficulty: "Dificultad:", newGame: "Nuevo juego", nightMode: "Modo nocturno", time: "Tiempo", mistakes: "Errores", gameOver: "¡Juego terminado!", congrats: "¡Felicidades! Has ganado." },
+  it: { difficulty: "Difficoltà:", newGame: "Nuova partita", nightMode: "Modalità notturna", time: "Tempo", mistakes: "Errori", gameOver: "Gioco finito!", congrats: "Congratulazioni! Hai vinto!" },
+  ru: { difficulty: "Сложность:", newGame: "Новая игра", nightMode: "Ночной режим", time: "Время", mistakes: "Ошибки", gameOver: "Игра окончена!", congrats: "Поздравляем! Вы выиграли!" },
+  zh: { difficulty: "难度：", newGame: "新游戏", nightMode: "夜间模式", time: "时间", mistakes: "错误", gameOver: "游戏结束！", congrats: "恭喜你！你赢了！" }
 };
 
 let currentLang = "en";
@@ -142,19 +142,6 @@ function setLanguage(lang) {
   document.getElementById('night-btn').textContent = "🌙 " + t.nightMode;
   document.getElementById('time-label').textContent = t.time + ": ";
   document.getElementById('mistake-label').textContent = t.mistakes + ": ";
-}
-
-function showGameOver() {
-  document.getElementById("game-over").textContent = "❌ " + translations[currentLang].gameOver;
-}
-
-const numberPad = document.getElementById("number-pad");
-for (let i = 1; i <= 9; i++) {
-  const btn = document.createElement("div");
-  btn.textContent = i;
-  btn.className = "number-button";
-  btn.onclick = () => fillNumber(i);
-  numberPad.appendChild(btn);
 }
 
 function toggleTheme() {
@@ -189,54 +176,6 @@ function generateSudoku(difficulty) {
     if (board[i][j] !== 0) {
       board[i][j] = 0;
       removed++;
-    }
-  }
-}
-
-function drawBoard() {
-  const grid = document.getElementById("sudoku");
-  grid.innerHTML = "";
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.dataset.row = i;
-      cell.dataset.col = j;
-      if (board[i][j] !== 0) {
-        cell.textContent = board[i][j];
-        cell.classList.add("locked");
-      } else {
-        cell.onclick = () => selectCell(cell);
-      }
-      grid.appendChild(cell);
-    }
-  }
-}
-
-function selectCell(cell) {
-  if (selectedCell) selectedCell.classList.remove("selected");
-  selectedCell = cell;
-  selectedCell.classList.add("selected");
-}
-
-function fillNumber(num) {
-  if (!selectedCell) return;
-  const row = parseInt(selectedCell.dataset.row);
-  const col = parseInt(selectedCell.dataset.col);
-  if (solution[row][col] === num) {
-    selectedCell.textContent = num;
-    selectedCell.classList.remove("selected");
-    selectedCell = null;
-  } else {
-    mistakes++;
-    document.getElementById("mistakes").textContent = mistakes;
-    selectedCell.classList.add("incorrect");
-    setTimeout(() => {
-      selectedCell.classList.remove("incorrect");
-    }, 500);
-    if (mistakes >= 3) {
-      showGameOver();
-      clearInterval(interval);
     }
   }
 }
@@ -286,6 +225,87 @@ function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+function drawBoard() {
+  const grid = document.getElementById("sudoku");
+  grid.innerHTML = "";
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      if (board[i][j] !== 0) {
+        cell.textContent = board[i][j];
+        cell.classList.add("locked");
+      } else {
+        cell.onclick = () => selectCell(cell);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function selectCell(cell) {
+  if (selectedCell) selectedCell.classList.remove("selected");
+  selectedCell = cell;
+  selectedCell.classList.add("selected");
+}
+
+function checkWin() {
+  const cells = document.querySelectorAll(".cell:not(.locked)");
+  for (const cell of cells) {
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+    if (parseInt(cell.textContent) !== solution[row][col]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function fillNumber(num) {
+  if (!selectedCell) return;
+  const row = parseInt(selectedCell.dataset.row);
+  const col = parseInt(selectedCell.dataset.col);
+  if (solution[row][col] === num) {
+    selectedCell.textContent = num;
+    selectedCell.classList.remove("selected");
+    selectedCell = null;
+
+    if (checkWin()) {
+      document.getElementById("game-over").textContent = "🎉 " + translations[currentLang].congrats;
+      clearInterval(interval);
+      setTimeout(() => {
+        newGame();
+      }, 3000);
+    }
+  } else {
+    mistakes++;
+    document.getElementById("mistakes").textContent = mistakes;
+    selectedCell.classList.add("incorrect");
+    setTimeout(() => {
+      selectedCell.classList.remove("incorrect");
+    }, 500);
+    if (mistakes >= 3) {
+      document.getElementById("game-over").textContent =
+        "❌ " + translations[currentLang].gameOver + " (⏳ 2s)";
+      clearInterval(interval);
+      setTimeout(() => {
+        newGame();
+      }, 2000);
+    }
+  }
+}
+
+const numberPad = document.getElementById("number-pad");
+for (let i = 1; i <= 9; i++) {
+  const btn = document.createElement("div");
+  btn.textContent = i;
+  btn.className = "number-button";
+  btn.onclick = () => fillNumber(i);
+  numberPad.appendChild(btn);
 }
 
 window.onload = newGame;
