@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sudoku</title>
   <style>
     body {
@@ -30,6 +30,7 @@
       grid-template-columns: repeat(9, 45px);
       grid-template-rows: repeat(9, 45px);
       border: 2px solid black;
+      margin: 10px auto;
     }
     .cell {
       width: 45px;
@@ -60,21 +61,10 @@
     #sudoku .cell:nth-child(n+46):nth-child(-n+54) {
       border-bottom: 2px solid black;
     }
-    #sudoku .cell:nth-child(1),
-    #sudoku .cell:nth-child(4),
-    #sudoku .cell:nth-child(7),
-    #sudoku .cell:nth-child(28),
-    #sudoku .cell:nth-child(31),
-    #sudoku .cell:nth-child(34),
-    #sudoku .cell:nth-child(55),
-    #sudoku .cell:nth-child(58),
-    #sudoku .cell:nth-child(61) {
-      border-left: 2px solid black;
-    }
     .number-pad {
       display: grid;
       grid-template-columns: repeat(3, 35px);
-      gap: 6px;
+      gap: 5px;
       margin-top: 20px;
     }
     .number-button {
@@ -86,10 +76,6 @@
       background: #eee;
       border: 1px solid #aaa;
       cursor: pointer;
-      transition: background 0.2s;
-    }
-    .number-button:hover {
-      background: #ddd;
     }
     .controls {
       margin-bottom: 10px;
@@ -100,18 +86,209 @@
 <div class="container">
   <div class="game-panel">
     <div class="controls">
-      <label>Difficulty:</label>
+      <label id="label-diff">Difficulty:</label>
       <select id="difficulty">
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
-      <button onclick="newGame()">New Game</button>
-      <button onclick="toggleTheme()">🌙 Night Mode</button>
+      <button id="new-game-btn" onclick="newGame()">New Game</button>
+      <button id="night-btn" onclick="toggleTheme()">🌙 Night Mode</button>
+      <select onchange="setLanguage(this.value)">
+        <option value="en">🇬🇧 EN</option>
+        <option value="pl">🇵🇱 PL</option>
+        <option value="fr">🇫🇷 FR</option>
+        <option value="es">🇪🇸 ES</option>
+        <option value="it">🇮🇹 IT</option>
+        <option value="ru">🇷🇺 RU</option>
+        <option value="zh">🇨🇳 中文</option>
+      </select>
     </div>
-    <div>⏱️ Time: <span id="time">0</span>s | ❌ Mistakes: <span id="mistakes">0</span></div>
+    <div>
+      <span id="time-label">Time: </span><span id="time">0</span>s |
+      <span id="mistake-label">Mistakes: </span><span id="mistakes">0</span>
+    </div>
     <div id="game-over" style="color: red; margin-top: 10px; font-weight: bold;"></div>
     <div id="sudoku"></div>
   </div>
   <div class="number-pad" id="number-pad"></div>
 </div>
+
+<script>
+let selectedCell = null;
+let board = [];
+let solution = [];
+let mistakes = 0;
+let timer = 0;
+let interval;
+
+const translations = {
+  en: { difficulty: "Difficulty:", newGame: "New Game", nightMode: "Night Mode", time: "Time", mistakes: "Mistakes", gameOver: "Game Over!" },
+  pl: { difficulty: "Poziom trudności:", newGame: "Nowa gra", nightMode: "Tryb nocny", time: "Czas", mistakes: "Błędy", gameOver: "Koniec gry!" },
+  fr: { difficulty: "Difficulté:", newGame: "Nouvelle partie", nightMode: "Mode nuit", time: "Temps", mistakes: "Erreurs", gameOver: "Jeu terminé!" },
+  es: { difficulty: "Dificultad:", newGame: "Nuevo juego", nightMode: "Modo nocturno", time: "Tiempo", mistakes: "Errores", gameOver: "¡Juego terminado!" },
+  it: { difficulty: "Difficoltà:", newGame: "Nuova partita", nightMode: "Modalità notturna", time: "Tempo", mistakes: "Errori", gameOver: "Gioco finito!" },
+  ru: { difficulty: "Сложность:", newGame: "Новая игра", nightMode: "Ночной режим", time: "Время", mistakes: "Ошибки", gameOver: "Игра окончена!" },
+  zh: { difficulty: "难度：", newGame: "新游戏", nightMode: "夜间模式", time: "时间", mistakes: "错误", gameOver: "游戏结束！" }
+};
+
+let currentLang = "en";
+
+function setLanguage(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+  document.getElementById('label-diff').textContent = t.difficulty;
+  document.getElementById('new-game-btn').textContent = t.newGame;
+  document.getElementById('night-btn').textContent = "🌙 " + t.nightMode;
+  document.getElementById('time-label').textContent = t.time + ": ";
+  document.getElementById('mistake-label').textContent = t.mistakes + ": ";
+}
+
+function showGameOver() {
+  document.getElementById("game-over").textContent = "❌ " + translations[currentLang].gameOver;
+}
+
+const numberPad = document.getElementById("number-pad");
+for (let i = 1; i <= 9; i++) {
+  const btn = document.createElement("div");
+  btn.textContent = i;
+  btn.className = "number-button";
+  btn.onclick = () => fillNumber(i);
+  numberPad.appendChild(btn);
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("dark");
+}
+
+function newGame() {
+  clearInterval(interval);
+  document.getElementById("game-over").textContent = "";
+  timer = 0;
+  mistakes = 0;
+  document.getElementById("time").textContent = timer;
+  document.getElementById("mistakes").textContent = mistakes;
+  interval = setInterval(() => {
+    timer++;
+    document.getElementById("time").textContent = timer;
+  }, 1000);
+
+  const difficulty = document.getElementById("difficulty").value;
+  generateSudoku(difficulty);
+  drawBoard();
+}
+
+function generateSudoku(difficulty) {
+  const blanks = { easy: 30, medium: 45, hard: 55 }[difficulty];
+  board = generateFullBoard();
+  solution = JSON.parse(JSON.stringify(board));
+  let removed = 0;
+  while (removed < blanks) {
+    const i = Math.floor(Math.random() * 9);
+    const j = Math.floor(Math.random() * 9);
+    if (board[i][j] !== 0) {
+      board[i][j] = 0;
+      removed++;
+    }
+  }
+}
+
+function drawBoard() {
+  const grid = document.getElementById("sudoku");
+  grid.innerHTML = "";
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      if (board[i][j] !== 0) {
+        cell.textContent = board[i][j];
+        cell.classList.add("locked");
+      } else {
+        cell.onclick = () => selectCell(cell);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function selectCell(cell) {
+  if (selectedCell) selectedCell.classList.remove("selected");
+  selectedCell = cell;
+  selectedCell.classList.add("selected");
+}
+
+function fillNumber(num) {
+  if (!selectedCell) return;
+  const row = parseInt(selectedCell.dataset.row);
+  const col = parseInt(selectedCell.dataset.col);
+  if (solution[row][col] === num) {
+    selectedCell.textContent = num;
+    selectedCell.classList.remove("selected");
+    selectedCell = null;
+  } else {
+    mistakes++;
+    document.getElementById("mistakes").textContent = mistakes;
+    selectedCell.classList.add("incorrect");
+    setTimeout(() => {
+      selectedCell.classList.remove("incorrect");
+    }, 500);
+    if (mistakes >= 3) {
+      showGameOver();
+      clearInterval(interval);
+    }
+  }
+}
+
+function generateFullBoard() {
+  const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+  solve(board);
+  return board;
+}
+
+function solve(board) {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (board[row][col] === 0) {
+        const numbers = shuffle([...Array(9).keys()].map(x => x + 1));
+        for (let num of numbers) {
+          if (isValid(board, row, col, num)) {
+            board[row][col] = num;
+            if (solve(board)) return true;
+            board[row][col] = 0;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function isValid(board, row, col, num) {
+  for (let x = 0; x < 9; x++) {
+    if (board[row][x] === num || board[x][col] === num) return false;
+  }
+  const startRow = row - row % 3;
+  const startCol = col - col % 3;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (board[startRow + i][startCol + j] === num) return false;
+    }
+  }
+  return true;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+window.onload = newGame;
+</script>
+</body>
+</html>
