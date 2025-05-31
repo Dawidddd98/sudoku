@@ -21,6 +21,7 @@
     .container {
       display: flex;
       gap: 10px;
+      align-items: flex-start;
     }
     .game-panel {
       text-align: center;
@@ -49,12 +50,13 @@
       cursor: default;
     }
     .cell.incorrect {
-      background-color: #f88;
+      background-color: #f88 !important;
     }
     .cell.selected {
       background: #cceeff;
     }
-    #sudoku .cell:nth-child(3n) {
+    #sudoku .cell:nth-child(9n+3),
+    #sudoku .cell:nth-child(9n+6) {
       border-right: 2px solid black;
     }
     #sudoku .cell:nth-child(n+19):nth-child(-n+27),
@@ -63,16 +65,16 @@
     }
     .number-pad {
       display: grid;
-      grid-template-columns: repeat(3, 45px);
-      gap: 3px;
-      margin-top: 0px;
+      grid-template-columns: repeat(3, 40px);
+      gap: 4px;
+      margin-left: 5px;
     }
     .number-button {
-      width: 45px;
-      height: 45px;
-      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
       text-align: center;
-      line-height: 45px;
+      line-height: 40px;
       background: #eee;
       border: 1px solid #aaa;
       cursor: pointer;
@@ -271,7 +273,7 @@ function fillNumber(num) {
   const col = parseInt(selectedCell.dataset.col);
   if (solution[row][col] === num) {
     selectedCell.textContent = num;
-    selectedCell.classList.remove("selected");
+    selectedCell.classList.remove("selected", "incorrect");
     selectedCell = null;
 
     if (checkWin()) {
@@ -284,11 +286,12 @@ function fillNumber(num) {
   } else {
     mistakes++;
     document.getElementById("mistakes").textContent = mistakes;
-    const wrongCell = selectedCell;
-    wrongCell.classList.add("incorrect");
+    selectedCell.classList.add("incorrect");
+
     setTimeout(() => {
-      wrongCell.classList.remove("incorrect");
-    }, 500);
+      if (selectedCell) selectedCell.classList.remove("incorrect");
+    }, 1000);
+
     if (mistakes >= 3) {
       document.getElementById("game-over").textContent = "❌ " + translations[currentLang].gameOver + " (⏳ 2s)";
       clearInterval(interval);
