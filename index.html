@@ -32,7 +32,7 @@
     #sudoku-board {
       display: grid;
       grid-template-columns: repeat(9, 60px);
-      gap: 1px;
+      gap: 0;
       border: 3px solid #333;
     }
 
@@ -57,10 +57,21 @@
     #sudoku-board input:nth-child(3n) {
       border-right: 3px solid #000;
     }
-
-    #sudoku-board input:nth-child(n+19):nth-child(-n+27),
-    #sudoku-board input:nth-child(n+46):nth-child(-n+54) {
+    #sudoku-board input:nth-child(n+1):nth-child(-n+9),
+    #sudoku-board input:nth-child(n+28):nth-child(-n+36),
+    #sudoku-board input:nth-child(n+55):nth-child(-n+63) {
       border-bottom: 3px solid #000;
+    }
+    #sudoku-board input:nth-child(1),
+    #sudoku-board input:nth-child(10),
+    #sudoku-board input:nth-child(19),
+    #sudoku-board input:nth-child(28),
+    #sudoku-board input:nth-child(37),
+    #sudoku-board input:nth-child(46),
+    #sudoku-board input:nth-child(55),
+    #sudoku-board input:nth-child(64),
+    #sudoku-board input:nth-child(73) {
+      border-left: 3px solid #000;
     }
 
     body.dark #sudoku-board input {
@@ -151,62 +162,14 @@
 
   <script>
     const translations = {
-      en: {
-        newGame: "New Game", easy: "Easy", medium: "Medium", hard: "Hard", hint: "Hint",
-        darkMode: "Dark Mode", language: "Language:", errors: "Errors:", time: "Time:",
-        message: "",
-        win: "Congratulations! You solved the puzzle.",
-        lose: "You made 3 mistakes. Game over.",
-      },
-      pl: {
-        newGame: "Nowa gra", easy: "Łatwy", medium: "Średni", hard: "Trudny", hint: "Podpowiedź",
-        darkMode: "Tryb ciemny", language: "Język:", errors: "Błędy:", time: "Czas:",
-        message: "",
-        win: "Gratulacje! Rozwiązałeś Sudoku.",
-        lose: "Popełniłeś 3 błędy. Koniec gry.",
-      },
-      zh: {
-        newGame: "新游戏", easy: "简单", medium: "中等", hard: "困难", hint: "提示",
-        darkMode: "深色模式", language: "语言：", errors: "错误：", time: "时间：",
-        message: "",
-        win: "恭喜！你完成了数独。",
-        lose: "你犯了三次错误。游戏结束。",
-      },
-      ru: {
-        newGame: "Новая игра", easy: "Лёгкий", medium: "Средний", hard: "Сложный", hint: "Подсказка",
-        darkMode: "Тёмный режим", language: "Язык:", errors: "Ошибки:", time: "Время:",
-        message: "",
-        win: "Поздравляем! Вы решили судоку.",
-        lose: "Вы допустили 3 ошибки. Игра окончена.",
-      },
-      fr: {
-        newGame: "Nouvelle partie", easy: "Facile", medium: "Moyen", hard: "Difficile", hint: "Indice",
-        darkMode: "Mode sombre", language: "Langue:", errors: "Erreurs:", time: "Temps:",
-        message: "",
-        win: "Félicitations! Vous avez résolu le sudoku.",
-        lose: "Vous avez fait 3 erreurs. Partie terminée.",
-      },
-      it: {
-        newGame: "Nuova partita", easy: "Facile", medium: "Medio", hard: "Difficile", hint: "Suggerimento",
-        darkMode: "Modalità scura", language: "Lingua:", errors: "Errori:", time: "Tempo:",
-        message: "",
-        win: "Congratulazioni! Hai risolto il sudoku.",
-        lose: "Hai fatto 3 errori. Fine del gioco.",
-      },
-      es: {
-        newGame: "Nuevo juego", easy: "Fácil", medium: "Medio", hard: "Difícil", hint: "Pista",
-        darkMode: "Modo oscuro", language: "Idioma:", errors: "Errores:", time: "Tiempo:",
-        message: "",
-        win: "¡Felicidades! Has resuelto el sudoku.",
-        lose: "Has cometido 3 errores. Fin del juego.",
-      },
-      pt: {
-        newGame: "Novo jogo", easy: "Fácil", medium: "Médio", hard: "Difícil", hint: "Dica",
-        darkMode: "Modo escuro", language: "Idioma:", errors: "Erros:", time: "Tempo:",
-        message: "",
-        win: "Parabéns! Você resolveu o sudoku.",
-        lose: "Você cometeu 3 erros. Fim de jogo.",
-      }
+      en: { newGame: "New Game", easy: "Easy", medium: "Medium", hard: "Hard", hint: "Hint", darkMode: "Dark Mode", language: "Language:", errors: "Errors:", time: "Time:", message: "", win: "Congratulations! You solved the puzzle.", lose: "You made 3 mistakes. Game over." },
+      pl: { newGame: "Nowa gra", easy: "Łatwy", medium: "Średni", hard: "Trudny", hint: "Podpowiedź", darkMode: "Tryb ciemny", language: "Język:", errors: "Błędy:", time: "Czas:", message: "", win: "Gratulacje! Rozwiązałeś Sudoku.", lose: "Popełniłeś 3 błędy. Koniec gry." },
+      zh: { newGame: "新游戏", easy: "简单", medium: "中等", hard: "困难", hint: "提示", darkMode: "深色模式", language: "语言：", errors: "错误：", time: "时间：", message: "", win: "恭喜！你完成了数独。", lose: "你犯了三次错误。游戏结束。" },
+      ru: { newGame: "Новая игра", easy: "Лёгкий", medium: "Средний", hard: "Сложный", hint: "Подсказка", darkMode: "Тёмный режим", language: "Язык:", errors: "Ошибки:", time: "Время:", message: "", win: "Поздравляем! Вы решили судоку.", lose: "Вы допустили 3 ошибки. Игра окончена." },
+      fr: { newGame: "Nouvelle partie", easy: "Facile", medium: "Moyen", hard: "Difficile", hint: "Indice", darkMode: "Mode sombre", language: "Langue:", errors: "Erreurs:", time: "Temps:", message: "", win: "Félicitations! Vous avez résolu le sudoku.", lose: "Vous avez fait 3 erreurs. Partie terminée." },
+      it: { newGame: "Nuova partita", easy: "Facile", medium: "Medio", hard: "Difficile", hint: "Suggerimento", darkMode: "Modalità scura", language: "Lingua:", errors: "Errori:", time: "Tempo:", message: "", win: "Congratulazioni! Hai risolto il sudoku.", lose: "Hai fatto 3 errori. Fine del gioco." },
+      es: { newGame: "Nuevo juego", easy: "Fácil", medium: "Medio", hard: "Difícil", hint: "Pista", darkMode: "Modo oscuro", language: "Idioma:", errors: "Errores:", time: "Tiempo:", message: "", win: "¡Felicidades! Has resuelto el sudoku.", lose: "Has cometido 3 errores. Fin del juego." },
+      pt: { newGame: "Novo jogo", easy: "Fácil", medium: "Médio", hard: "Difícil", hint: "Dica", darkMode: "Modo escuro", language: "Idioma:", errors: "Erros:", time: "Tempo:", message: "", win: "Parabéns! Você resolveu o sudoku.", lose: "Você cometeu 3 erros. Fim de jogo." }
     };
 
     const elementsToTranslate = document.querySelectorAll('[data-i18n]');
@@ -218,6 +181,8 @@
           el.textContent = translations[lang][key];
         }
       });
+      localStorage.setItem('sudokuLang', lang);
+      document.getElementById('language-select').value = lang;
     }
 
     document.getElementById('language-select').addEventListener('change', (e) => {
@@ -225,8 +190,9 @@
       updateLanguage(selectedLang);
     });
 
-    // Ustaw język domyślny
-    updateLanguage('pl');
+    const savedLang = localStorage.getItem('sudokuLang') || 'pl';
+    updateLanguage(savedLang);
   </script>
 </body>
 </html>
+
