@@ -6,116 +6,43 @@
   <title>Sudoku Game</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      text-align: center;
       background-color: #f4f4f4;
       color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      font-size: 20px;
     }
-
-    body.dark {
-      background-color: #121212;
-      color: #eee;
+    #controls, #number-pad, #message, footer {
+      margin: 20px auto;
     }
-
-    #controls {
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
     #sudoku-board {
       display: grid;
-      grid-template-columns: repeat(9, 60px);
-      gap: 0;
-      border: 3px solid #333;
-    }
-
-    #sudoku-board input {
-      width: 58px;
-      height: 58px;
-      text-align: center;
-      font-size: 24px;
-      border: 1px solid #ccc;
-      background-color: white;
-    }
-
-    #sudoku-board input.given {
-      background-color: #e0e0e0;
-    }
-
-    #sudoku-board input.active {
-      border: 2px solid #3399ff !important;
-      background: #e6f2ff;
-    }
-
-    #sudoku-board input:nth-child(3n) {
-      border-right: 3px solid #000;
-    }
-    #sudoku-board input:nth-child(n+1):nth-child(-n+9),
-    #sudoku-board input:nth-child(n+28):nth-child(-n+36),
-    #sudoku-board input:nth-child(n+55):nth-child(-n+63) {
-      border-bottom: 3px solid #000;
-    }
-    #sudoku-board input:nth-child(1),
-    #sudoku-board input:nth-child(10),
-    #sudoku-board input:nth-child(19),
-    #sudoku-board input:nth-child(28),
-    #sudoku-board input:nth-child(37),
-    #sudoku-board input:nth-child(46),
-    #sudoku-board input:nth-child(55),
-    #sudoku-board input:nth-child(64),
-    #sudoku-board input:nth-child(73) {
-      border-left: 3px solid #000;
-    }
-
-    body.dark #sudoku-board input {
-      background-color: #1e1e1e;
-      color: #eee;
-    }
-
-    body.dark #sudoku-board input.given {
-      background-color: #333;
-    }
-
-    body.dark #sudoku-board input.active {
-      background-color: #1e2a33;
-      border-color: #66ccff !important;
-    }
-
-    #number-pad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 30px;
-      max-width: 300px;
-      margin-inline: auto;
-    }
-
-    #number-pad button {
-      font-size: 24px;
-      padding: 15px;
-      border-radius: 10px;
-      border: 2px solid #999;
-      background: #f0f0f0;
-      cursor: pointer;
-    }
-
-    body.dark #number-pad button {
-      background: #2a2a2a;
-      color: #eee;
-      border-color: #444;
-    }
-
-    #message {
+      grid-template-columns: repeat(9, 40px);
+      gap: 2px;
+      justify-content: center;
       margin-top: 20px;
-      font-size: 22px;
-      font-weight: bold;
+    }
+    #sudoku-board input {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    #sudoku-board input.given {
+      background-color: #ddd;
+    }
+    #sudoku-board input.active {
+      border: 2px solid #007BFF;
+    }
+    #number-pad button {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      margin: 5px;
+    }
+    footer {
+      font-size: 0.8rem;
+      color: #777;
     }
   </style>
 </head>
@@ -133,12 +60,6 @@
     <select id="language-select">
       <option value="pl" selected>Polski</option>
       <option value="en">English</option>
-      <option value="zh">中文</option>
-      <option value="ru">Русский</option>
-      <option value="fr">Français</option>
-      <option value="it">Italiano</option>
-      <option value="es">Español</option>
-      <option value="pt">Português</option>
     </select>
     <div><span data-i18n="errors">Błędy:</span> <span id="errors">0</span></div>
     <div><span data-i18n="time">Czas:</span> <span id="timer">00:00</span></div>
@@ -159,25 +80,24 @@
   </div>
 
   <div id="message" data-i18n="message"></div>
+  <footer>
+    Autor: Ty &middot; Kod źródłowy: <a href="https://github.com/" target="_blank">GitHub</a>
+  </footer>
 
   <script>
     const translations = {
-      en: { newGame: "New Game", easy: "Easy", medium: "Medium", hard: "Hard", hint: "Hint", darkMode: "Dark Mode", language: "Language:", errors: "Errors:", time: "Time:", message: "", win: "Congratulations! You solved the puzzle.", lose: "You made 3 mistakes. Game over." },
-      pl: { newGame: "Nowa gra", easy: "Łatwy", medium: "Średni", hard: "Trudny", hint: "Podpowiedź", darkMode: "Tryb ciemny", language: "Język:", errors: "Błędy:", time: "Czas:", message: "", win: "Gratulacje! Rozwiązałeś Sudoku.", lose: "Popełniłeś 3 błędy. Koniec gry." },
-      zh: { newGame: "新游戏", easy: "简单", medium: "中等", hard: "困难", hint: "提示", darkMode: "深色模式", language: "语言：", errors: "错误：", time: "时间：", message: "", win: "恭喜！你完成了数独。", lose: "你犯了三次错误。游戏结束。" },
-      ru: { newGame: "Новая игра", easy: "Лёгкий", medium: "Средний", hard: "Сложный", hint: "Подсказка", darkMode: "Тёмный режим", language: "Язык:", errors: "Ошибки:", time: "Время:", message: "", win: "Поздравляем! Вы решили судоку.", lose: "Вы допустили 3 ошибки. Игра окончена." },
-      fr: { newGame: "Nouvelle partie", easy: "Facile", medium: "Moyen", hard: "Difficile", hint: "Indice", darkMode: "Mode sombre", language: "Langue:", errors: "Erreurs:", time: "Temps:", message: "", win: "Félicitations! Vous avez résolu le sudoku.", lose: "Vous avez fait 3 erreurs. Partie terminée." },
-      it: { newGame: "Nuova partita", easy: "Facile", medium: "Medio", hard: "Difficile", hint: "Suggerimento", darkMode: "Modalità scura", language: "Lingua:", errors: "Errori:", time: "Tempo:", message: "", win: "Congratulazioni! Hai risolto il sudoku.", lose: "Hai fatto 3 errori. Fine del gioco." },
-      es: { newGame: "Nuevo juego", easy: "Fácil", medium: "Medio", hard: "Difícil", hint: "Pista", darkMode: "Modo oscuro", language: "Idioma:", errors: "Errores:", time: "Tiempo:", message: "", win: "¡Felicidades! Has resuelto el sudoku.", lose: "Has cometido 3 errores. Fin del juego." },
-      pt: { newGame: "Novo jogo", easy: "Fácil", medium: "Médio", hard: "Difícil", hint: "Dica", darkMode: "Modo escuro", language: "Idioma:", errors: "Erros:", time: "Tempo:", message: "", win: "Parabéns! Você resolveu o sudoku.", lose: "Você cometeu 3 erros. Fim de jogo." }
+      pl: {
+        newGame: "Nowa gra", easy: "Łatwy", medium: "Średni", hard: "Trudny", hint: "Podpowiedź", darkMode: "Tryb ciemny", language: "Język:", errors: "Błędy:", time: "Czas:", message: "", win: "Gratulacje! Rozwiązałeś Sudoku.", lose: "Popełniłeś 3 błędy. Koniec gry."
+      },
+      en: {
+        newGame: "New Game", easy: "Easy", medium: "Medium", hard: "Hard", hint: "Hint", darkMode: "Dark Mode", language: "Language:", errors: "Errors:", time: "Time:", message: "", win: "Congratulations! You solved the puzzle.", lose: "You made 3 mistakes. Game over."
+      }
     };
 
-    const elementsToTranslate = document.querySelectorAll('[data-i18n]');
-
     function updateLanguage(lang) {
-      elementsToTranslate.forEach(el => {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
+        if (translations[lang][key]) {
           el.textContent = translations[lang][key];
         }
       });
@@ -186,12 +106,102 @@
     }
 
     document.getElementById('language-select').addEventListener('change', (e) => {
-      const selectedLang = e.target.value;
-      updateLanguage(selectedLang);
+      updateLanguage(e.target.value);
     });
 
     const savedLang = localStorage.getItem('sudokuLang') || 'pl';
     updateLanguage(savedLang);
+
+    let errorCount = 0;
+
+    function generateEmptyBoard() {
+      const board = document.getElementById('sudoku-board');
+      board.innerHTML = '';
+      for (let i = 0; i < 81; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 1;
+        input.dataset.index = i;
+        if (Math.random() < 0.2) {
+          input.value = String(Math.floor(Math.random() * 9) + 1);
+          input.disabled = true;
+          input.classList.add('given');
+        }
+        input.addEventListener('focus', () => {
+          document.querySelectorAll('#sudoku-board input').forEach(el => el.classList.remove('active'));
+          input.classList.add('active');
+        });
+        input.addEventListener('input', () => validateInput(input));
+        board.appendChild(input);
+      }
+      errorCount = 0;
+      document.getElementById('errors').textContent = errorCount;
+      document.getElementById('message').textContent = '';
+    }
+
+    function validateInput(input) {
+      const value = input.value;
+      const valid = /^[1-9]$/.test(value);
+      if (!valid) {
+        input.value = '';
+        return;
+      }
+      const index = parseInt(input.dataset.index);
+      const row = Math.floor(index / 9);
+      const col = index % 9;
+      const boardInputs = document.querySelectorAll('#sudoku-board input');
+
+      let isValid = true;
+      for (let i = 0; i < 9; i++) {
+        const rowInput = boardInputs[row * 9 + i];
+        const colInput = boardInputs[i * 9 + col];
+        const boxInput = boardInputs[3 * Math.floor(row / 3) * 9 + 3 * Math.floor(col / 3) + 3 * Math.floor(i / 3) + i % 3];
+
+        if ((rowInput !== input && rowInput.value === value) ||
+            (colInput !== input && colInput.value === value) ||
+            (boxInput !== input && boxInput.value === value)) {
+          isValid = false;
+          break;
+        }
+      }
+
+      input.style.backgroundColor = isValid ? '' : 'salmon';
+
+      if (!isValid) {
+        errorCount++;
+        document.getElementById('errors').textContent = errorCount;
+        if (errorCount >= 3) {
+          document.getElementById('message').textContent = translations[savedLang].lose;
+          setTimeout(generateEmptyBoard, 2000);
+        }
+      } else {
+        checkWinCondition();
+      }
+    }
+
+    function checkWinCondition() {
+      const boardInputs = document.querySelectorAll('#sudoku-board input');
+      for (let input of boardInputs) {
+        if (!input.value || !/^[1-9]$/.test(input.value)) {
+          return;
+        }
+      }
+      document.getElementById('message').textContent = translations[savedLang].win;
+    }
+
+    generateEmptyBoard();
+
+    document.getElementById('new-game').addEventListener('click', generateEmptyBoard);
+
+    document.querySelectorAll('#number-pad .num').forEach(button => {
+      button.addEventListener('click', () => {
+        const active = document.querySelector('#sudoku-board input.active:not(:disabled)');
+        if (active) {
+          active.value = button.textContent;
+          validateInput(active);
+        }
+      });
+    });
   </script>
 </body>
 </html>
