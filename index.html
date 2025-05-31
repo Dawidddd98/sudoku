@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -106,14 +106,14 @@
 <body>
   <div class="controls">
     <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
+      <option value="easy">Łatwy</option>
+      <option value="medium">Średni</option>
+      <option value="hard">Trudny</option>
     </select>
     <button id="themeToggle" onclick="toggleDarkMode()">🌙</button>
     <select id="language" class="lang-select" onchange="setLanguage(this.value)">
-      <option value="en">English</option>
       <option value="pl">Polski</option>
+      <option value="en">English</option>
       <option value="fr">Français</option>
       <option value="es">Español</option>
       <option value="it">Italiano</option>
@@ -141,8 +141,8 @@
         <button onclick="placeNumber(9)">9</button>
       </div>
       <div class="info">
-        <p id="mistakes">Mistakes: 0/3</p>
-        <p id="timer">Time: 0s</p>
+        <p id="mistakes">Błędy: 0/3</p>
+        <p id="timer">Czas: 0s</p>
         <p id="status"></p>
       </div>
     </div>
@@ -157,7 +157,7 @@
 
     function updateTimer() {
       timer++;
-      document.getElementById("timer").textContent = `Time: ${timer}s`;
+      document.getElementById("timer").textContent = `Czas: ${timer}s`;
     }
 
     function startTimer() {
@@ -168,9 +168,9 @@
 
     function addMistake() {
       mistakes++;
-      document.getElementById("mistakes").textContent = `Mistakes: ${mistakes}/3`;
+      document.getElementById("mistakes").textContent = `Błędy: ${mistakes}/3`;
       if (mistakes >= 3) {
-        document.getElementById("status").textContent = "Game over! New board in 1s...";
+        document.getElementById("status").textContent = "Przegrana! Nowa plansza za 1s...";
         setTimeout(() => generateBoard(), 1000);
       }
     }
@@ -178,7 +178,7 @@
     function generateBoard() {
       boardElement.innerHTML = "";
       mistakes = 0;
-      document.getElementById("mistakes").textContent = `Mistakes: 0/3`;
+      document.getElementById("mistakes").textContent = `Błędy: 0/3`;
       document.getElementById("status").textContent = "";
       startTimer();
 
@@ -211,8 +211,8 @@
           cell.className = "cell";
           if (i % 3 === 0) cell.classList.add("thick-top");
           if (j % 3 === 0) cell.classList.add("thick-left");
-          if ((i + 1) % 3 === 0) cell.classList.add("thick-bottom");
-          if ((j + 1) % 3 === 0) cell.classList.add("thick-right");
+          if (i === 8) cell.classList.add("thick-bottom");
+          if (j === 8) cell.classList.add("thick-right");
           cell.dataset.correct = solution[i][j];
           if (puzzle[i][j]) {
             cell.textContent = puzzle[i][j];
@@ -252,3 +252,4 @@
   </script>
 </body>
 </html>
+
