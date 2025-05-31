@@ -33,6 +33,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 * {
     margin: 0;
     padding: 0;
@@ -101,17 +102,16 @@ body {
 .number-btn:hover {
     background-color: #ddd;
 }
+
 let selectedNumber = null;
 let selectedCell = null;
 let timer = 0;
 let interval;
 
-const board = document.getElementById("sudoku-board");
-const timeDisplay = document.getElementById("time");
-
 // Funkcja generująca pustą planszę Sudoku
 function generateBoard() {
-    board.innerHTML = '';
+    const board = document.getElementById("sudoku-board");
+    board.innerHTML = ''; // Czyszczenie planszy przed jej ponownym utworzeniem
     for (let i = 0; i < 81; i++) {
         const cell = document.createElement("div");
         cell.classList.add("cell");
@@ -142,7 +142,7 @@ function startTimer() {
         timer++;
         const minutes = Math.floor(timer / 60);
         const seconds = timer % 60;
-        timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.getElementById("time").textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }, 1000);
 }
 
@@ -156,5 +156,7 @@ numberButtons.forEach(button => {
 });
 
 // Inicjalizacja planszy i timera
-generateBoard();
-startTimer();
+window.onload = () => {
+    generateBoard();
+    startTimer();
+};
