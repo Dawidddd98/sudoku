@@ -3,28 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sudoku Game</title>
+  <title>Sudoku</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
       background-color: #f4f4f4;
       color: #333;
+      padding: 20px;
     }
-    #controls, #number-pad, #message, footer {
-      margin: 20px auto;
+    #left-panel {
+      margin-right: 40px;
+    }
+    #controls, #message {
+      margin-bottom: 20px;
+      text-align: left;
     }
     #sudoku-board {
       display: grid;
-      grid-template-columns: repeat(9, 40px);
+      grid-template-columns: repeat(9, 50px);
       gap: 2px;
-      justify-content: center;
-      margin-top: 20px;
     }
     #sudoku-board input {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
       text-align: center;
       border: 1px solid #ccc;
     }
@@ -34,38 +40,45 @@
     #sudoku-board input.active {
       border: 2px solid #007BFF;
     }
+    #number-pad {
+      display: flex;
+      flex-direction: column;
+    }
     #number-pad button {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
+      width: 60px;
+      height: 60px;
+      font-size: 20px;
       margin: 5px;
     }
     footer {
-      font-size: 0.8rem;
-      color: #777;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div id="controls">
-    <button id="new-game" data-i18n="newGame">Nowa gra</button>
-    <select id="difficulty-select">
-      <option value="easy" data-i18n="easy">Łatwy</option>
-      <option value="medium" data-i18n="medium" selected>Średni</option>
-      <option value="hard" data-i18n="hard">Trudny</option>
-    </select>
-    <button id="hint-btn" data-i18n="hint">Podpowiedź</button>
-    <button onclick="toggleDarkMode()" data-i18n="darkMode">Tryb ciemny</button>
-    <label for="language-select" data-i18n="language">Język:</label>
-    <select id="language-select">
-      <option value="pl" selected>Polski</option>
-      <option value="en">English</option>
-    </select>
-    <div><span data-i18n="errors">Błędy:</span> <span id="errors">0</span></div>
-    <div><span data-i18n="time">Czas:</span> <span id="timer">00:00</span></div>
-  </div>
+  <div id="left-panel">
+    <div id="controls">
+      <button id="new-game" data-i18n="newGame">Nowa gra</button>
+      <select id="difficulty-select">
+        <option value="easy" data-i18n="easy">Łatwy</option>
+        <option value="medium" data-i18n="medium" selected>Średni</option>
+        <option value="hard" data-i18n="hard">Trudny</option>
+      </select>
+      <button id="hint-btn" data-i18n="hint">Podpowiedź</button>
+      <button onclick="toggleDarkMode()" data-i18n="darkMode">Tryb ciemny</button>
+      <label for="language-select" data-i18n="language">Język:</label>
+      <select id="language-select">
+        <option value="pl" selected>Polski</option>
+        <option value="en">English</option>
+      </select>
+      <div><span data-i18n="errors">Błędy:</span> <span id="errors">0</span></div>
+      <div><span data-i18n="time">Czas:</span> <span id="timer">00:00</span></div>
+    </div>
 
-  <div id="sudoku-board"></div>
+    <div id="sudoku-board"></div>
+
+    <div id="message" data-i18n="message"></div>
+  </div>
 
   <div id="number-pad">
     <button class="num">1</button>
@@ -78,11 +91,6 @@
     <button class="num">8</button>
     <button class="num">9</button>
   </div>
-
-  <div id="message" data-i18n="message"></div>
-  <footer>
-    Autor: Ty &middot; Kod źródłowy: <a href="https://github.com/" target="_blank">GitHub</a>
-  </footer>
 
   <script>
     const translations = {
