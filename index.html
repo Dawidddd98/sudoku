@@ -61,7 +61,6 @@
     .numbers {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap;
       margin-top: 20px;
       gap: 10px;
     }
@@ -76,32 +75,30 @@
     .lang-select {
       margin-left: 10px;
     }
-    /* Bold borders for 3x3 boxes */
     .cell {
       border: 1px solid #999;
     }
-    .cell:nth-child(9n+1) {
-      border-left: 3px solid black;
-    }
-    .cell:nth-child(n):nth-child(-n+9) {
-      border-top: 3px solid black;
-    }
-    .cell:nth-child(9n) {
+    .board div:nth-child(3n) {
       border-right: 3px solid black;
     }
-    .cell:nth-child(n+73) {
+    .board div:nth-child(n+19):nth-child(-n+27),
+    .board div:nth-child(n+46):nth-child(-n+54),
+    .board div:nth-child(n+73):nth-child(-n+81) {
       border-bottom: 3px solid black;
     }
-    .cell:nth-child(n+28):nth-child(-n+36),
-    .cell:nth-child(n+55):nth-child(-n+63) {
-      border-bottom: 3px solid black;
+    .board div:nth-child(9n+1),
+    .board div:nth-child(9n+4),
+    .board div:nth-child(9n+7) {
+      border-left: 3px solid black;
+    }
+    .board div:nth-child(-n+9) {
+      border-top: 3px solid black;
     }
   </style>
 </head>
 <body>
   <div class="controls">
     <button onclick="newGame()" id="newGameBtn">Nowa gra</button>
-    <button onclick="newPuzzle()" id="newPuzzleBtn">Nowa plansza</button>
     <select id="difficulty">
       <option value="easy">Łatwy</option>
       <option value="medium">Średni</option>
@@ -144,12 +141,12 @@
     let mistakes = 0;
 
     const translations = {
-      pl: { newGame: "Nowa gra", newPuzzle: "Nowa plansza", mistakes: "Błędy", win: "Wygrałeś!", lose: "Przegrałeś!" },
-      en: { newGame: "New Game", newPuzzle: "New Puzzle", mistakes: "Mistakes", win: "You win!", lose: "You lost!" },
-      fr: { newGame: "Nouvelle partie", newPuzzle: "Nouveau puzzle", mistakes: "Erreurs", win: "Gagné!", lose: "Perdu!" },
-      es: { newGame: "Nuevo juego", newPuzzle: "Nuevo puzzle", mistakes: "Errores", win: "¡Ganaste!", lose: "¡Perdiste!" },
-      it: { newGame: "Nuova partita", newPuzzle: "Nuovo schema", mistakes: "Errori", win: "Hai vinto!", lose: "Hai perso!" },
-      ru: { newGame: "Новая игра", newPuzzle: "Новая задача", mistakes: "Ошибки", win: "Вы выиграли!", lose: "Вы проиграли!" }
+      pl: { newGame: "Nowa gra", mistakes: "Błędy", win: "Wygrałeś!", lose: "Przegrałeś!" },
+      en: { newGame: "New Game", mistakes: "Mistakes", win: "You win!", lose: "You lost!" },
+      fr: { newGame: "Nouvelle partie", mistakes: "Erreurs", win: "Gagné!", lose: "Perdu!" },
+      es: { newGame: "Nuevo juego", mistakes: "Errores", win: "¡Ganaste!", lose: "¡Perdiste!" },
+      it: { newGame: "Nuova partita", mistakes: "Errori", win: "Hai vinto!", lose: "Hai perso!" },
+      ru: { newGame: "Новая игра", mistakes: "Ошибки", win: "Вы выиграли!", lose: "Вы проиграли!" }
     };
 
     let currentLang = "pl";
@@ -157,7 +154,6 @@
     function setLanguage(lang) {
       currentLang = lang;
       document.getElementById("newGameBtn").textContent = translations[lang].newGame;
-      document.getElementById("newPuzzleBtn").textContent = translations[lang].newPuzzle;
       document.getElementById("mistakes").textContent = `${translations[lang].mistakes}: ${mistakes}/3`;
     }
 
@@ -245,7 +241,7 @@
     }
 
     function placeNumber(num) {
-      if (!selectedCell) return;
+      if (!selectedCell || document.body.classList.contains("game-over")) return;
       const row = parseInt(selectedCell.dataset.row);
       const col = parseInt(selectedCell.dataset.col);
       if (solution[row][col] === num) {
@@ -260,9 +256,17 @@
         document.getElementById("mistakes").textContent = `${translations[currentLang].mistakes}: ${mistakes}/3`;
         if (mistakes >= 3) {
           document.getElementById("status").textContent = translations[currentLang].lose;
-          setTimeout(() => newGame(), 3000);
+          document.body.classList.add("game-over");
+          disableBoard();
         }
       }
+    }
+
+    function disableBoard() {
+      const cells = document.querySelectorAll(".cell");
+      cells.forEach(cell => {
+        cell.onclick = null;
+      });
     }
 
     function checkWin() {
@@ -273,18 +277,15 @@
       document.getElementById("status").textContent = translations[currentLang].win;
     }
 
-    function newPuzzle() {
+    function newGame() {
+      mistakes = 0;
+      document.getElementById("status").textContent = "";
+      document.body.classList.remove("game-over");
+      setLanguage(currentLang);
       solution = generateFullBoard();
       const diff = document.getElementById("difficulty").value;
       board = createPuzzleFromSolution(solution, diff);
       drawBoard();
-    }
-
-    function newGame() {
-      mistakes = 0;
-      document.getElementById("status").textContent = "";
-      setLanguage(currentLang);
-      newPuzzle();
     }
 
     newGame();
