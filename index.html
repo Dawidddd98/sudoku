@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sudoku</title>
+  <meta charset="UTF-8">
+  <title id="title">Sudoku</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,6 +21,7 @@
       grid-template-columns: repeat(9, 40px);
       grid-template-rows: repeat(9, 40px);
       margin: 20px auto;
+      justify-content: center;
     }
     input {
       width: 40px;
@@ -28,6 +29,7 @@
       font-size: 18px;
       text-align: center;
       border: 1px solid #999;
+      box-sizing: border-box;
     }
     input[disabled] {
       background-color: #ddd;
@@ -45,174 +47,73 @@
 </head>
 <body>
   <h1 id="title">Sudoku</h1>
-
-  <p>
-    <span id="label-language">Język:</span>
-    <select id="language" onchange="updateLanguage()">
-      <option value="pl">Polski</option>
-      <option value="fr">Français</option>
-      <option value="es">Español</option>
-      <option value="it">Italiano</option>
-      <option value="zh">中文</option>
-      <option value="ru">Русский</option>
-      <option value="pt">Português</option>
-    </select>
-  </p>
-
-  <p>
-    <span id="label-difficulty">Poziom trudności:</span>
-    <select id="difficulty">
-      <option value="easy">Łatwy</option>
-      <option value="medium">Średni</option>
-      <option value="hard">Trudny</option>
-    </select>
-    <button onclick="startGame()" id="btn-new">Nowa gra</button>
-    <button onclick="toggleTheme()" id="btn-theme">🌙 Tryb nocny</button>
-  </p>
-
-  <p id="status-line">
-    ⏱️ <span id="label-time">Czas:</span> <span id="timer">00:00</span> |
-    ❌ <span id="label-mistakes">Błędy:</span> <span id="mistakes">0</span>/3
-  </p>
-
+  <label id="label-difficulty">Difficulty:</label>
+  <select id="difficulty">
+    <option value="easy">Easy</option>
+    <option value="medium">Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+  <label id="label-language">Language:</label>
+  <select id="language" onchange="updateLanguage()">
+    <option value="en">English</option>
+    <option value="pl">Polski</option>
+    <option value="fr">Français</option>
+    <option value="es">Español</option>
+    <option value="it">Italiano</option>
+    <option value="zh">中文</option>
+    <option value="ru">Русский</option>
+    <option value="pt">Português</option>
+  </select>
+  <button id="btn-new" onclick="newGame()">New Game</button>
+  <button id="btn-theme" onclick="toggleTheme()">🌙 Night Mode</button>
+  <div>
+    <span id="label-time">Time:</span> <span id="time">0</span>s |
+    <span id="label-mistakes">Mistakes:</span> <span id="mistakes">0</span>
+  </div>
   <div id="sudoku"></div>
-  <h2 id="game-over" style="display:none;">Koniec gry! 🛑</h2>
+  <div id="game-over" style="font-size: 20px; color: red;"></div>
 
   <script>
-    const sudokuDiv = document.getElementById("sudoku");
-    const mistakesSpan = document.getElementById("mistakes");
-    const gameOverText = document.getElementById("game-over");
-    const timerSpan = document.getElementById("timer");
-    const difficultySelect = document.getElementById("difficulty");
-
-    let mistakes = 0;
-    const maxMistakes = 3;
-    let timer = 0;
-    let timerInterval;
-    let solution;
-    let puzzle;
-
-    const easyBoards = [
-      [
-        [5,3,"","","7","","","",""],
-        [6,"","",1,9,5,"","",""],
-        ["",9,8,"","","","",6,""],
-        [8,"","","",6,"","","",3],
-        [4,"","",8,"",3,"","",1],
-        [7,"","","",2,"","","",6],
-        ["",6,"","","","","",8,""],
-        ["","","",4,1,9,"","",5],
-        ["","","","","8","","",7,9],
-      ],
-      [
-        [1,"",3,"",2,"","","",4],
-        [9,"","",3,"",6,"","",7],
-        [2,8,"","","","","",1,""],
-        [5,"","","",6,"","","",3],
-        [1,"",5,"","",7,"","",6],
-        [8,"","","",5,"","","",2],
-        ["",1,"","","","","",8,""],
-        ["","",4,"","",9,"","",5],
-        ["",5,"","",1,"",7,"",""],
-      ],
-      [
-        [3,"","",8,"",1,"","",2],
-        [6,"","","",7,"","","",9],
-        [1,9,"","","","","",5,""],
-        ["",5,"","","6","","","",3],
-        [4,"","",7,"",8,"","",1],
-        [7,"","","",2,"","","",6],
-        ["",6,"","","","","",8,""],
-        ["","","",4,1,9,"","",5],
-        ["","","","","8","","","",9],
-      ]
-    ];
-
-    const mediumBoards = [ /* dodaj inne plansze analogicznie */ ];
-    const hardBoards = [ /* dodaj inne plansze analogicznie */ ];
-
-    const fullSolution = [
-      [5,3,4,6,7,8,9,1,2],
-      [6,7,2,1,9,5,3,4,8],
-      [1,9,8,3,4,2,5,6,7],
-      [8,5,9,7,6,1,4,2,3],
-      [4,2,6,8,5,3,7,9,1],
-      [7,1,3,9,2,4,8,5,6],
-      [9,6,1,5,3,7,2,8,4],
-      [2,8,7,4,1,9,6,3,5],
-      [3,4,5,2,8,6,1,7,9],
-    ];
-
     const translations = {
+      en: {
+        title: "Sudoku", difficulty: "Difficulty:", time: "Time:",
+        mistakes: "Mistakes:", new: "New Game", theme: "🌙 Night Mode",
+        gameOver: "Game Over! 🛑", language: "Language:"
+      },
       pl: {
-        title: "Sudoku",
-        difficulty: "Poziom trudności:",
-        time: "Czas:",
-        mistakes: "Błędy:",
-        new: "Nowa gra",
-        theme: "🌙 Tryb nocny",
-        gameOver: "Koniec gry! 🛑",
-        language: "Język:"
+        title: "Sudoku", difficulty: "Poziom:", time: "Czas:",
+        mistakes: "Błędy:", new: "Nowa gra", theme: "🌙 Tryb nocny",
+        gameOver: "Koniec gry! 🛑", language: "Język:"
       },
       fr: {
-        title: "Sudoku",
-        difficulty: "Difficulté:",
-        time: "Temps:",
-        mistakes: "Fautes:",
-        new: "Nouvelle partie",
-        theme: "🌙 Mode nuit",
-        gameOver: "Fin du jeu ! 🛑",
-        language: "Langue:"
+        title: "Sudoku", difficulty: "Difficulté:", time: "Temps:",
+        mistakes: "Erreurs:", new: "Nouvelle partie", theme: "🌙 Mode nuit",
+        gameOver: "Fin de partie! 🛑", language: "Langue:"
       },
       es: {
-        title: "Sudoku",
-        difficulty: "Dificultad:",
-        time: "Tiempo:",
-        mistakes: "Errores:",
-        new: "Nuevo juego",
-        theme: "🌙 Modo nocturno",
-        gameOver: "¡Fin del juego! 🛑",
-        language: "Idioma:"
+        title: "Sudoku", difficulty: "Dificultad:", time: "Tiempo:",
+        mistakes: "Errores:", new: "Nuevo juego", theme: "🌙 Modo noche",
+        gameOver: "¡Juego terminado! 🛑", language: "Idioma:"
       },
       it: {
-        title: "Sudoku",
-        difficulty: "Difficoltà:",
-        time: "Tempo:",
-        mistakes: "Errori:",
-        new: "Nuova partita",
-        theme: "🌙 Modalità notturna",
-        gameOver: "Fine del gioco! 🛑",
-        language: "Lingua:"
+        title: "Sudoku", difficulty: "Difficoltà:", time: "Tempo:",
+        mistakes: "Errori:", new: "Nuova partita", theme: "🌙 Modalità notte",
+        gameOver: "Gioco finito! 🛑", language: "Lingua:"
       },
       zh: {
-        title: "数独",
-        difficulty: "难度：",
-        time: "时间：",
-        mistakes: "错误：",
-        new: "新游戏",
-        theme: "🌙 夜间模式",
-        gameOver: "游戏结束 🛑",
-        language: "语言："
+        title: "数独", difficulty: "难度:", time: "时间:",
+        mistakes: "错误数:", new: "新游戏", theme: "🌙 夜间模式",
+        gameOver: "游戏结束! 🛑", language: "语言:"
       },
       ru: {
-        title: "Судоку",
-        difficulty: "Сложность:",
-        time: "Время:",
-        mistakes: "Ошибки:",
-        new: "Новая игра",
-        theme: "🌙 Ночной режим",
-        gameOver: "Игра окончена! 🛑",
-        language: "Язык:"
+        title: "Судоку", difficulty: "Сложность:", time: "Время:",
+        mistakes: "Ошибки:", new: "Новая игра", theme: "🌙 Ночной режим",
+        gameOver: "Игра окончена! 🛑", language: "Язык:"
       },
       pt: {
-        title: "Sudoku",
-        difficulty: "Dificuldade:",
-        time: "Tempo:",
-        mistakes: "Erros:",
-        new: "Novo jogo",
-        theme: "🌙 Modo noturno",
-        gameOver: "Fim de jogo! 🛑",
-        language: "Idioma:"
+        title: "Sudoku", difficulty: "Dificuldade:", time: "Tempo:",
+        mistakes: "Erros:", new: "Novo jogo", theme: "🌙 Modo noturno",
+        gameOver: "Fim de jogo! 🛑", language: "Idioma:"
       }
     };
 
@@ -226,88 +127,147 @@
       document.getElementById("btn-new").innerText = t.new;
       document.getElementById("btn-theme").innerText = t.theme;
       document.getElementById("label-language").innerText = t.language;
-      document.getElementById("game-over").innerText = t.gameOver;
-    }
+      document.getElementById("game-over").innerText = "";
 
-    function startGame() {
-      clearInterval(timerInterval);
-      timer = 0;
-      timerSpan.textContent = "00:00";
-      mistakes = 0;
-      mistakesSpan.textContent = "0";
-      gameOverText.style.display = "none";
-      sudokuDiv.innerHTML = "";
-
-      const level = difficultySelect.value;
-      if (level === "easy") puzzle = structuredClone(randomFrom(easyBoards));
-      else if (level === "medium") puzzle = structuredClone(randomFrom(mediumBoards));
-      else puzzle = structuredClone(randomFrom(hardBoards));
-      solution = fullSolution;
-
-      drawGrid();
-      timerInterval = setInterval(updateTimer, 1000);
-    }
-
-    function updateTimer() {
-      timer++;
-      const minutes = String(Math.floor(timer / 60)).padStart(2, "0");
-      const seconds = String(timer % 60).padStart(2, "0");
-      timerSpan.textContent = `${minutes}:${seconds}`;
-    }
-
-    function drawGrid() {
-      for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-          const input = document.createElement("input");
-
-          // Grube ramki
-          if (row % 3 === 0) input.style.borderTop = "3px solid black";
-          if (col % 3 === 0) input.style.borderLeft = "3px solid black";
-          if (row === 8) input.style.borderBottom = "3px solid black";
-          if (col === 8) input.style.borderRight = "3px solid black";
-
-          if (puzzle[row][col] !== "") {
-            input.value = puzzle[row][col];
-            input.disabled = true;
-          } else {
-            input.addEventListener("input", (e) => {
-              const val = parseInt(e.target.value);
-              const correct = solution[row][col];
-
-              if (val === correct) {
-                e.target.classList.remove("incorrect");
-              } else {
-                e.target.classList.add("incorrect");
-                mistakes++;
-                mistakesSpan.textContent = mistakes;
-                if (mistakes >= maxMistakes) {
-                  endGame();
-                }
-              }
-            });
-          }
-
-          sudokuDiv.appendChild(input);
-        }
+      const levels = {
+        en: ["Easy", "Medium", "Hard"],
+        pl: ["Łatwy", "Średni", "Trudny"],
+        fr: ["Facile", "Moyen", "Difficile"],
+        es: ["Fácil", "Medio", "Difícil"],
+        it: ["Facile", "Medio", "Difficile"],
+        zh: ["简单", "中等", "困难"],
+        ru: ["Легкий", "Средний", "Тяжелый"],
+        pt: ["Fácil", "Médio", "Difícil"]
+      };
+      const opts = document.getElementById("difficulty").options;
+      const lbls = levels[lang];
+      for (let i = 0; i < opts.length; i++) {
+        opts[i].text = lbls[i];
       }
     }
 
-    function randomFrom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function endGame() {
-      clearInterval(timerInterval);
-      gameOverText.style.display = "block";
-      document.querySelectorAll("input:not([disabled])").forEach(input => input.disabled = true);
-    }
+    let correctBoard = "";
+    let timer = null;
+    let seconds = 0;
+    let mistakeCount = 0;
 
     function toggleTheme() {
       document.body.classList.toggle("dark");
     }
 
-    updateLanguage();
-    startGame();
+    function generateSudoku(difficulty = "easy") {
+      const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+
+      function isSafe(row, col, num) {
+        for (let x = 0; x < 9; x++) {
+          if (board[row][x] === num || board[x][col] === num) return false;
+        }
+        const startRow = row - row % 3, startCol = col - col % 3;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (board[startRow + i][startCol + j] === num) return false;
+          }
+        }
+        return true;
+      }
+
+      function fillBoard() {
+        for (let row = 0; row < 9; row++) {
+          for (let col = 0; col < 9; col++) {
+            if (board[row][col] === 0) {
+              const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+              for (let num of nums) {
+                if (isSafe(row, col, num)) {
+                  board[row][col] = num;
+                  if (fillBoard()) return true;
+                  board[row][col] = 0;
+                }
+              }
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function removeCells(count) {
+        while (count > 0) {
+          const r = Math.floor(Math.random() * 9);
+          const c = Math.floor(Math.random() * 9);
+          if (board[r][c] !== 0) {
+            board[r][c] = 0;
+            count--;
+          }
+        }
+      }
+
+      fillBoard();
+      correctBoard = board.map(r => [...r]);
+
+      const blanks = difficulty === "easy" ? 35 : difficulty === "medium" ? 45 : 55;
+      removeCells(blanks);
+
+      return board.map(r => r.join("")).join("");
+    }
+
+    function newGame() {
+      clearInterval(timer);
+      seconds = 0;
+      document.getElementById("time").innerText = seconds;
+      mistakeCount = 0;
+      document.getElementById("mistakes").innerText = mistakeCount;
+      document.getElementById("game-over").innerText = "";
+
+      const boardStr = generateSudoku(document.getElementById("difficulty").value);
+      const container = document.getElementById("sudoku");
+      container.innerHTML = "";
+
+      for (let i = 0; i < 81; i++) {
+        const input = document.createElement("input");
+        const val = boardStr[i];
+        const row = Math.floor(i / 9);
+        const col = i % 9;
+        if (val !== "0") {
+          input.value = val;
+          input.disabled = true;
+        } else {
+          input.addEventListener("input", () => {
+            const userVal = parseInt(input.value);
+            if (userVal === correctBoard[row][col]) {
+              input.classList.remove("incorrect");
+            } else {
+              input.classList.add("incorrect");
+              mistakeCount++;
+              document.getElementById("mistakes").innerText = mistakeCount;
+              if (mistakeCount >= 3) {
+                document.getElementById("game-over").innerText = translations[document.getElementById("language").value].gameOver;
+                clearInterval(timer);
+                document.querySelectorAll("#sudoku input").forEach(i => i.disabled = true);
+              }
+            }
+          });
+        }
+        container.appendChild(input);
+      }
+
+      timer = setInterval(() => {
+        seconds++;
+        document.getElementById("time").innerText = seconds;
+      }, 1000);
+    }
+
+    window.onload = () => {
+      updateLanguage();
+      newGame();
+    };
   </script>
 </body>
 </html>
