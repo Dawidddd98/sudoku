@@ -9,7 +9,7 @@
       background: #fff;
       color: #000;
       margin: 0;
-      padding: 20px;
+      padding: 60px 20px 20px 20px;
       display: flex;
       justify-content: center;
       transition: 0.3s;
@@ -20,7 +20,7 @@
     }
     .container {
       display: flex;
-      gap: 10px;
+      gap: 20px;
       align-items: flex-start;
     }
     .game-panel {
@@ -28,17 +28,17 @@
     }
     #sudoku {
       display: grid;
-      grid-template-columns: repeat(9, 60px);
-      grid-template-rows: repeat(9, 60px);
+      grid-template-columns: repeat(9, 70px);
+      grid-template-rows: repeat(9, 70px);
       border: 2px solid black;
       margin: 10px auto;
     }
     .cell {
-      width: 60px;
-      height: 60px;
-      font-size: 26px;
+      width: 70px;
+      height: 70px;
+      font-size: 32px;
       text-align: center;
-      line-height: 60px;
+      line-height: 70px;
       border: 1px solid #999;
       box-sizing: border-box;
       cursor: pointer;
@@ -65,16 +65,16 @@
     }
     .number-pad {
       display: grid;
-      grid-template-columns: repeat(3, 60px);
-      gap: 6px;
+      grid-template-columns: repeat(3, 70px);
+      gap: 8px;
       margin-left: 5px;
     }
     .number-button {
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
+      width: 70px;
+      height: 70px;
+      font-size: 32px;
       text-align: center;
-      line-height: 60px;
+      line-height: 70px;
       background: #eee;
       border: 1px solid #aaa;
       cursor: pointer;
@@ -315,4 +315,5 @@ window.onload = newGame;
 </script>
 </body>
 </html>
+
 
