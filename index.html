@@ -25,7 +25,8 @@
     #sudoku-board {
       display: grid;
       grid-template-columns: repeat(9, 50px);
-      gap: 2px;
+      gap: 0;
+      border: 3px solid #000;
     }
     #sudoku-board input {
       width: 50px;
@@ -40,15 +41,33 @@
     #sudoku-board input.active {
       border: 2px solid #007BFF;
     }
+    #sudoku-board input {
+      box-sizing: border-box;
+    }
+    #sudoku-board input:nth-child(3n+1) {
+      border-left: 3px solid #000;
+    }
+    #sudoku-board input:nth-child(n+1):nth-child(-n+9) {
+      border-top: 3px solid #000;
+    }
+    #sudoku-board input:nth-child(n+19):nth-child(-n+27),
+    #sudoku-board input:nth-child(n+46):nth-child(-n+54),
+    #sudoku-board input:nth-child(n+73):nth-child(-n+81) {
+      border-bottom: 1px solid #ccc;
+    }
+    #sudoku-board input:nth-child(n+55):nth-child(-n+81) {
+      border-bottom: 3px solid #000;
+    }
     #number-pad {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 5px;
     }
     #number-pad button {
       width: 60px;
       height: 60px;
       font-size: 20px;
-      margin: 5px;
+      margin: 0;
     }
     footer {
       display: none;
