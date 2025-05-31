@@ -1,138 +1,160 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Sudoku Gra</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      padding: 20px;
-    }
-    #game-container {
-      display: flex;
-      flex-direction: row;
-    }
-    #sudoku-grid {
-      border-collapse: collapse;
-    }
-    #sudoku-grid td {
-      border: 1px solid #999;
-      width: 40px;
-      height: 40px;
-      text-align: center;
-    }
-    #sudoku-grid input {
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      font-size: 18px;
-    }
-    #digit-panel {
-      display: flex;
-      flex-direction: column;
-      margin-left: 20px;
-      align-items: center;
-    }
-    #digit-panel button {
-      width: 50px;
-      height: 50px;
-      margin: 5px;
-      font-size: 18px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="game-container">
-  <table id="sudoku-grid"></table>
-  <div id="digit-panel">
-    <button data-digit="1">1</button>
-    <button data-digit="2">2</button>
-    <button data-digit="3">3</button>
-    <button data-digit="4">4</button>
-    <button data-digit="5">5</button>
-    <button data-digit="6">6</button>
-    <button data-digit="7">7</button>
-    <button data-digit="8">8</button>
-    <button data-digit="9">9</button>
-    <button id="clearBtn">Wyczyść</button>
-  </div>
-</div>
-<div>
-  <label for="languageSelect">Język:</label>
-  <select id="languageSelect">
-    <option value="pl">Polski</option>
-    <option value="en">English</option>
-    <option value="fr">Français</option>
-    <option value="es">Español</option>
-    <option value="ru">Русский</option>
-    <option value="pt">Português</option>
-    <option value="it">Italiano</option>
-  </select>
-  <label for="difficultySelect">Poziom:</label>
-  <select id="difficultySelect">
-    <option value="easy">Latwy</option>
-    <option value="medium">Średni</option>
-    <option value="hard">Trudny</option>
-  </select>
-  <button id="startBtn">Start</button>
-  <button id="resetBtn">Reset</button>
-  <p id="timer"></p>
-  <p id="score"></p>
-  <p id="errors"></p>
-  <p id="messages"></p>
-</div>
-<script>
-  const gridSize = 9;
-  let selectedCell = null;
-  let errors = 0;
-  let score = 0;
-  let secondsElapsed = 0;
-  let timerInterval = null;
-  const maxErrors = 3;
-  let puzzle = [];
-  let solution = [];
+    <div class="container">
+        <div class="timer">
+            <h2>Czas: <span id="time">00:00</span></h2>
+        </div>
 
-  const sudokuGrid = document.getElementById('sudoku-grid');
-  const digitPanel = document.getElementById('digit-panel');
-  const clearBtn = document.getElementById('clearBtn');
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const difficultySelect = document.getElementById('difficultySelect');
-  const languageSelect = document.getElementById('languageSelect');
-  const timerDisplay = document.getElementById('timer');
-  const scoreDisplay = document.getElementById('score');
-  const errorsDisplay = document.getElementById('errors');
-  const messagesDisplay = document.getElementById('messages');
+        <div class="board" id="sudoku-board">
+            <!-- Plansza Sudoku będzie tworzona dynamicznie w JS -->
+        </div>
 
-  let currentLang = 'pl';
+        <div class="numbers" id="number-selection">
+            <!-- Numery do wyboru 1-9 -->
+            <button class="number-btn" data-num="1">1</button>
+            <button class="number-btn" data-num="2">2</button>
+            <button class="number-btn" data-num="3">3</button>
+            <button class="number-btn" data-num="4">4</button>
+            <button class="number-btn" data-num="5">5</button>
+            <button class="number-btn" data-num="6">6</button>
+            <button class="number-btn" data-num="7">7</button>
+            <button class="number-btn" data-num="8">8</button>
+            <button class="number-btn" data-num="9">9</button>
+        </div>
+    </div>
 
-  const translations = {
-    pl: { timer: 'Czas', score: 'Punkty', errors: 'Błędy', start: 'Start', reset: 'Reset', clear: 'Wyczyść', gameOver: 'Koniec gry!', congrats: (score, time) => `Gratulacje! Punkty: ${score}, Czas: ${time}`, levels: { easy: 'Latwy', medium: 'Średni', hard: 'Trudny' }, languageLabel: 'Język:', difficultyLabel: 'Poziom:' },
-    en: { timer: 'Time', score: 'Score', errors: 'Errors', start: 'Start', reset: 'Reset', clear: 'Clear', gameOver: 'Game Over!', congrats: (score, time) => `Congratulations! Score: ${score}, Time: ${time}`, levels: { easy: 'Easy', medium: 'Medium', hard: 'Hard' }, languageLabel: 'Language:', difficultyLabel: 'Difficulty:' },
-    fr: { timer: 'Temps', score: 'Score', errors: 'Erreurs', start: 'Démarrer', reset: 'Réinitialiser', clear: 'Effacer', gameOver: 'Fin de jeu!', congrats: (score, time) => `Félicitations! Score: ${score}, Temps: ${time}`, levels: { easy: 'Facile', medium: 'Moyen', hard: 'Difficile' }, languageLabel: 'Langue:', difficultyLabel: 'Difficulté:' },
-    es: { timer: 'Tiempo', score: 'Puntaje', errors: 'Errores', start: 'Iniciar', reset: 'Reiniciar', clear: 'Borrar', gameOver: 'Juego Terminado!', congrats: (score, time) => `¡Felicidades! Puntaje: ${score}, Tiempo: ${time}`, levels: { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' }, languageLabel: 'Idioma:', difficultyLabel: 'Dificultad:' },
-    ru: { timer: 'Время', score: 'Счет', errors: 'Ошибки', start: 'Старт', reset: 'Сброс', clear: 'Удалить', gameOver: 'Игра окончена!', congrats: (score, time) => `Поздравляем! Счет: ${score}, Время: ${time}`, levels: { easy: 'Легкий', medium: 'Средний', hard: 'Сложный' }, languageLabel: 'Язык:', difficultyLabel: 'Сложность:' },
-    pt: { timer: 'Tempo', score: 'Pontuação', errors: 'Erros', start: 'Começar', reset: 'Redefinir', clear: 'Limpar', gameOver: 'Fim do jogo!', congrats: (score, time) => `Parabéns! Pontuação: ${score}, Tempo: ${time}`, levels: { easy: 'Fácil', medium: 'Médio', hard: 'Difícil' }, languageLabel: 'Idioma:', difficultyLabel: 'Dificuldade:' },
-    it: { timer: 'Tempo', score: 'Punti', errors: 'Errori', start: 'Inizia', reset: 'Reset', clear: 'Cancella', gameOver: 'Gioco finito!', congrats: (score, time) => `Congratulazioni! Punti: ${score}, Tempo: ${time}`, levels: { easy: 'Facile', medium: 'Medio', hard: 'Difficile' }, languageLabel: 'Lingua:', difficultyLabel: 'Difficoltà:' }
-  };
-
-  function updateScore() {
-    if (errors >= maxErrors) return;
-    const timePenalty = Math.floor(secondsElapsed / 60) * 50;
-    const levelPenalty = {
-      easy: 0,
-      medium: 100,
-      hard: 200
-    }[difficultySelect.value] || 0;
-    let baseScore = 500;
-    let newScore = Math.max(baseScore - timePenalty - levelPenalty - errors * 100, 0);
-    score = newScore;
-    scoreDisplay.textContent = `${translations[currentLang].score}: ${score}`;
-  }
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.container {
+    text-align: center;
+}
+
+.timer {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    grid-template-rows: repeat(9, 40px);
+    gap: 5px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.cell.selected {
+    background-color: #ffec99;
+}
+
+.numbers {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.number-btn {
+    font-size: 1.5rem;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.number-btn:hover {
+    background-color: #ddd;
+}
+let selectedNumber = null;
+let selectedCell = null;
+let timer = 0;
+let interval;
+
+const board = document.getElementById("sudoku-board");
+const timeDisplay = document.getElementById("time");
+
+// Funkcja generująca pustą planszę Sudoku
+function generateBoard() {
+    board.innerHTML = '';
+    for (let i = 0; i < 81; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.addEventListener("click", () => selectCell(cell));
+        board.appendChild(cell);
+    }
+}
+
+// Funkcja do zaznaczenia komórki
+function selectCell(cell) {
+    if (selectedCell) {
+        selectedCell.classList.remove("selected");
+    }
+    selectedCell = cell;
+    selectedCell.classList.add("selected");
+}
+
+// Funkcja do wyboru liczby
+function selectNumber(num) {
+    if (selectedCell) {
+        selectedCell.textContent = num;
+    }
+}
+
+// Funkcja do uruchomienia timera
+function startTimer() {
+    interval = setInterval(() => {
+        timer++;
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+        timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
+}
+
+// Obsługa kliknięcia w numery
+const numberButtons = document.querySelectorAll(".number-btn");
+numberButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        selectedNumber = button.getAttribute("data-num");
+        selectNumber(selectedNumber);
+    });
+});
+
+// Inicjalizacja planszy i timera
+generateBoard();
+startTimer();
